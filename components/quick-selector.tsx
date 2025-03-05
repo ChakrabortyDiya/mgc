@@ -30,7 +30,7 @@ export function QuickSelector() {
 
   const handleOptionClick = (option: string, type: "chart" | "plot") => {
     const setter = type === "chart" ? setSelectedChartOptions : setSelectedPlotOptions
-    const current = type === "chart" ? selectedChartOptions : selectedPlotOptions
+    /*const current = type === "chart" ? selectedChartOptions : selectedPlotOptions*/
     setter((prev) => (prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]))
   }
 

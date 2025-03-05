@@ -2,29 +2,28 @@
 
 import { useState } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 export function CompressorSelector() {
-  const [showTop, setShowTop] = useState(false)
-  const [showRelative, setShowRelative] = useState(false)
+  /*const [showTop, setShowTop] = useState(false)
+  const [showRelative, setShowRelative] = useState(false)*/
   const [compressorTypes, setCompressorTypes] = useState({
     proposed: true,
     standard: true,
   })
-  const [bestSettingsCount, setBestSettingsCount] = useState(1)
+  /*const [bestSettingsCount, setBestSettingsCount] = useState(1)
   const [linkSpeed, setLinkSpeed] = useState(100)
-  const [relativeCompressor, setRelativeCompressor] = useState("gzip-9")
+  const [relativeCompressor, setRelativeCompressor] = useState("gzip-9")*/
   const [selectedProposed, setSelectedProposed] = useState<string[]>([])
   const [selectedStandard, setSelectedStandard] = useState<string[]>([])
-  const [selectedSettings, setSelectedSettings] = useState<string[]>([])
+  /*const [selectedSettings, setSelectedSettings] = useState<string[]>([])*/
 
   const handleCompressorTypeChange = (type: "proposed" | "standard") => {
     setCompressorTypes((prev) => ({ ...prev, [type]: !prev[type] }))
     console.log(`${type} compressors ${compressorTypes[type] ? "unchecked" : "checked"}`)
   }
 
-  const handleShowTopChange = (checked: boolean) => {
+  /*const handleShowTopChange = (checked: boolean) => {
     setShowTop(checked)
     console.log(`Show only top ${checked ? "checked" : "unchecked"}`)
   }
@@ -32,9 +31,9 @@ export function CompressorSelector() {
   const handleShowRelativeChange = (checked: boolean) => {
     setShowRelative(checked)
     console.log(`Show all values relative to ${checked ? "checked" : "unchecked"}`)
-  }
+  }*/
 
-  const handleProposedChange = (compressor: string) => {
+  /*const handleProposedChange = (compressor: string) => {
     setSelectedProposed((prev) =>
       prev.includes(compressor) ? prev.filter((c) => c !== compressor) : [...prev, compressor],
     )
@@ -55,7 +54,7 @@ export function CompressorSelector() {
   const handleSettingsChange = (setting: string) => {
     setSelectedSettings((prev) => (prev.includes(setting) ? prev.filter((s) => s !== setting) : [...prev, setting]))
     console.log(`Compressor setting ${setting} ${selectedSettings.includes(setting) ? "deselected" : "selected"}`)
-  }
+  }*/
 
   return (
     <div className="space-y-6">

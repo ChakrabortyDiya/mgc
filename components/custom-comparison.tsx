@@ -5,8 +5,8 @@ import { useState } from "react"
 export function CustomComparison() {
   const [selectedGenomes, setSelectedGenomes] = useState<string[]>([])
   const [selectedDatasets, setSelectedDatasets] = useState<string[]>([])
-  const [aggregateChecked, setAggregateChecked] = useState(false)
-  const [aggregateType, setAggregateType] = useState("average")
+ /*const [aggregateChecked, setAggregateChecked] = useState(false)
+  const [aggregateType, setAggregateType] = useState("average")*/
 
   const handleGenomeChange = (genome: string) => {
     setSelectedGenomes((prev) => (prev.includes(genome) ? prev.filter((g) => g !== genome) : [...prev, genome]))
@@ -18,7 +18,7 @@ export function CustomComparison() {
     console.log(`Dataset ${dataset} ${selectedDatasets.includes(dataset) ? "deselected" : "selected"}`)
   }
 
-  const handleAggregateChange = () => {
+  /*const handleAggregateChange = () => {
     setAggregateChecked((prev) => !prev)
     console.log(`Aggregate results ${aggregateChecked ? "unchecked" : "checked"}`)
   }
@@ -26,7 +26,7 @@ export function CustomComparison() {
   const handleAggregateTypeChange = (type: string) => {
     setAggregateType(type)
     console.log(`Aggregate type changed to ${type}`)
-  }
+  }*/
 
   const genomes = [
     "AeCa (1,554 kB)",

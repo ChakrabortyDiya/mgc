@@ -1,12 +1,12 @@
 "use client"
 
-import { useState } from "react"
+/*import { useState } from "react"*/
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
+/*import { Checkbox } from "@/components/ui/checkbox"*/
 
 export function OutputConfiguration() {
-  const [chartSize, setChartSize] = useState({ width: 1500, height: 500 });
+  /*const [chartSize, setChartSize] = useState({ width: 1500, height: 500 });*/
 
   return (
     <div className="space-y-8">
