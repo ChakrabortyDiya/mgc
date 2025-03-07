@@ -135,17 +135,6 @@ export function CompressorSelector() {
               <option>P-Cmix</option>
             </select>
           </div>
-          <div className="flex-1">
-            <Label>Select individual compressor setting:</Label>
-            <select
-              multiple
-              className="w-full h-64 border rounded mt-2"
-              value={selectedStandard}
-              onChange={(e) => setSelectedStandard(Array.from(e.target.selectedOptions, (option) => option.value))}
-            >
-              <option></option>
-            </select>
-          </div>
         </div>
       </div>
     </div>
