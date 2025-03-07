@@ -79,23 +79,6 @@ export function CompressorSelector() {
                 <span>Proposed compressors</span>
               </label>
             </div>
-
-            <div className="space-y-4">
-              <label className="flex items-center space-x-2">
-                <Checkbox defaultChecked />
-                <span>Setting Metrics</span>
-              </label>
-
-              <select className="w-full border rounded px-2 py-1">
-                <option>Compression Ratio</option>
-                <option>Compression Time</option>
-                <option>Compression Memory</option>
-                <option>Compression CPU Usage</option>
-                <option>Decompression Time</option>
-                <option>Decompression Memory</option>
-                <option>Decompression CPU Usage</option>
-              </select>
-            </div>
           </div>
 
           <div className="flex-1">
@@ -106,14 +89,14 @@ export function CompressorSelector() {
               value={selectedProposed}
               onChange={(e) => setSelectedProposed(Array.from(e.target.selectedOptions, (option) => option.value))}
             >
-              <option>S-7zip</option>
-              <option>S-PAQ8</option>
-              <option>S-BSC</option>
-              <option>S-GZIP</option>
-              <option>S-ZSTD</option>
-              <option>S-BZIP2</option>
-              <option>S-ZPAQ</option>
-              <option>S-Cmix</option>
+              <option>s-7zip</option>
+              <option>s-paq8</option>
+              <option>s-bsc</option>
+              <option>s-gzip</option>
+              <option>s-zstd</option>
+              <option>s-bzip2</option>
+              <option>s-zpaq</option>
+              <option>s-cmix</option>
             </select>
           </div>
 
@@ -125,14 +108,14 @@ export function CompressorSelector() {
               value={selectedStandard}
               onChange={(e) => setSelectedStandard(Array.from(e.target.selectedOptions, (option) => option.value))}
             >
-              <option>P-7zip</option>
-              <option>P-PAQ8</option>
-              <option>P-BSC</option>
-              <option>P-GZIP</option>
-              <option>P-ZSTD</option>
-              <option>P-BZIP2</option>
-              <option>P-ZPAQ</option>
-              <option>P-Cmix</option>
+              <option>p-7zip</option>
+              <option>p-paq8</option>
+              <option>p-bsc</option>
+              <option>p-gzip</option>
+              <option>p-zstd</option>
+              <option>p-bzip2</option>
+              <option>p-zpaq</option>
+              <option>p-cmix</option>
             </select>
           </div>
         </div>
