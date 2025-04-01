@@ -24,14 +24,13 @@ export function OutputConfiguration() {
             <Label>Metrics:</Label>
             <div className="flex flex-col space-y-2">
               {[
-                "Name",
                 "Compression Ratio",
                 "Compression Time",
                 "Compression Memory",
                 "Compression CPU Usage",
-                "Decompression Ratio",
                 "Decompression Time",
                 "Decompression Memory",
+                "Decompression CPU Usage",
               ].map((column) => (
                 <label key={column} className="flex items-center space-x-2">
                   <input type="checkbox" className="form-checkbox h-4 w-4" />
