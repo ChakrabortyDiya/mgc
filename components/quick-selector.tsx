@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation";  
 
 export function QuickSelector() {
   const [testData, setTestData] = useState({
@@ -18,6 +19,8 @@ export function QuickSelector() {
   const [selectedChartOptions, setSelectedChartOptions] = useState<string[]>([])
   const [selectedPlotOptions, setSelectedPlotOptions] = useState<string[]>([])
 
+  const router = useRouter();  
+
   const handleTestDataChange = (category: "genomes" | "otherDatasets", option?: string) => {
     setTestData((prev) => ({
       ...prev,
@@ -32,6 +35,9 @@ export function QuickSelector() {
     const setter = type === "chart" ? setSelectedChartOptions : setSelectedPlotOptions
     /*const current = type === "chart" ? selectedChartOptions : selectedPlotOptions*/
     setter((prev) => (prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]))
+    if (type === "chart") {
+      router.push("/chart");  
+    }    
   }
 
   return (
