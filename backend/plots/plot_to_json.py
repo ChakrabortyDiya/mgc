@@ -38,7 +38,7 @@ class PlotGenerator:
                          title='Compression Data Bar Graph')
         
             # Display the figure
-            # fig.show()
+            fig.show()
         
             # Create JSON folder if it doesn't exist
             os.makedirs(json_folder, exist_ok=True)
@@ -77,6 +77,5 @@ class PlotGenerator:
 # if __name__ == "__main__":
 #     plot_gen = PlotGenerator()
 #     json_output = plot_gen.generate_data_by_name('compression ratio')
-    
 #     # Optionally, print the JSON data
 #     #print(json_output)

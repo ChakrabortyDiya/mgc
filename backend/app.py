@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any
 import subprocess, json
@@ -6,6 +7,16 @@ from backend.utils import ScatterPlotData, MetricsPlotData
 from backend.plots.plot_to_json import PlotGenerator
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust origins as needed
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 plot_generator = PlotGenerator()
 
 @app.post("/dashboard/plot")
@@ -18,4 +29,4 @@ def get_plot(MetricsPlotData: MetricsPlotData):
         json_data = plot_generator.generate_data_by_name(data_name)
         return json.loads(json_data)  # Return the JSON data as a response
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))        
+        raise HTTPException(status_code=500, detail=str(e))
