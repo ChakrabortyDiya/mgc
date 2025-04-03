@@ -50,18 +50,9 @@ const CompressionChart: React.FC<ChartProps> = ({
       stacked: false,
       toolbar: {
         show: true,
-        tools: {
-          zoom: true,
-          zoomin: true,
-          zoomout: true,
-          pan: true,
-          reset: true,
-        }
       },
       zoom: {
         enabled: true,
-        type: 'x', // Enables zooming along x-axis
-        autoScaleYaxis: true,
       },
     },
     responsive: [{
