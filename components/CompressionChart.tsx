@@ -50,9 +50,12 @@ const CompressionChart: React.FC<ChartProps> = ({
       stacked: false,
       toolbar: {
         show: true,
+        autoSelected: "zoom",
       },
       zoom: {
         enabled: true,
+        type: 'x',            // Enable zooming on the x-axis
+        autoScaleYaxis: true
       },
     },
     responsive: [{
@@ -71,17 +74,21 @@ const CompressionChart: React.FC<ChartProps> = ({
         columnWidth: '70%',
       },
     },
+    dataLabels: {
+      enabled: false
+    },
     xaxis: {
       type: 'category',
       categories: ids,
       title: {
         text: xAxisTitle
-      }
+      },
     },
     yaxis: {
       title: {
         text: yAxisTitle
       },
+      
     },
     legend: {
       position: 'right',
@@ -102,7 +109,7 @@ const CompressionChart: React.FC<ChartProps> = ({
       }
     }
   };
-
+  
   return (
     <div className="chart-container">
       <div className="overflow-x-auto">
