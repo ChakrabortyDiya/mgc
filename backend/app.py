@@ -2,22 +2,20 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any
 import subprocess, json
-from utils import ScatterPlotData, MetricsPlotData
+from backend.utils import ScatterPlotData, MetricsPlotData
+from backend.plots.plot_to_json import PlotGenerator
 
 app = FastAPI()
+plot_generator = PlotGenerator()
 
-@app.get("dashboard/plot")
-def get_plot(name: str):
+@app.post("/dashboard/plot")
+def get_plot(MetricsPlotData: MetricsPlotData):
+    """
+    Endpoint to generate a plot based on the provided data name.    
+    """
     try:
-        result = subprocess.run(["python", "plots/plot_to_csv.py", name],
-                                capture_output=True, text=True)
-        if result.returncode != 0:
-            raise HTTPException(status_code=400, detail=result.stderr)
-        json_output = json.loads(result.stdout)
-        if isinstance(json_output, dict) and json_output.get("error"):
-            raise HTTPException(status_code=400, detail=json_output["error"])
-        return json_output
-    except json.JSONDecodeError as e:
-        raise HTTPException(status_code=500, detail=f"Invalid JSON format: {str(e)}")
+        data_name = MetricsPlotData.name
+        json_data = plot_generator.generate_data_by_name(data_name)
+        return json.loads(json_data)  # Return the JSON data as a response
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))        

@@ -38,7 +38,7 @@ class PlotGenerator:
                          title='Compression Data Bar Graph')
         
             # Display the figure
-            fig.show()
+            # fig.show()
         
             # Create JSON folder if it doesn't exist
             os.makedirs(json_folder, exist_ok=True)
@@ -68,15 +68,15 @@ class PlotGenerator:
         
         # Here you can expand to support other data sources
         if data_name.lower() == 'compression ratio':
-            csv_file = r'd:\MGC\mgc\backend\data\compression_data.csv'
-            json_dir = r'd:\MGC\mgc\backend\data\plot_metadata'
+            csv_file = r'backend\data\compression_data.csv'
+            json_dir = r'backend\data\plot_metadata'
             return self.generate_plot(csv_file, json_dir)
         else:
             raise ValueError(f"Data name '{data_name}' is not recognized")
 
-if __name__ == "__main__":
-    plot_gen = PlotGenerator()
-    json_output = plot_gen.generate_data_by_name('compression ratio')
+# if __name__ == "__main__":
+#     plot_gen = PlotGenerator()
+#     json_output = plot_gen.generate_data_by_name('compression ratio')
     
-    # Optionally, print the JSON data
-    #print(json_output)
+#     # Optionally, print the JSON data
+#     #print(json_output)
