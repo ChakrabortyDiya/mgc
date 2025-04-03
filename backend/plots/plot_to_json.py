@@ -48,6 +48,8 @@ def generate_plot(csv_path: str, json_folder: str) -> None:
     except Exception as e:
         print(f"An error occurred: {e}")
 
+## define another function which will take the data name ( say compression ratio ) and call the above function
+
 if __name__ == "__main__":
     csv_file = r'd:\MGC\mgc\backend\data\compression_data.csv'
     json_dir = r'd:\MGC\mgc\backend\data\plot_metadata'
