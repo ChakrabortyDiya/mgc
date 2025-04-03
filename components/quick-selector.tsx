@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation";  
+import axios from "axios";
 
 export function QuickSelector() {
   const [testData, setTestData] = useState({
@@ -18,7 +19,8 @@ export function QuickSelector() {
 
   const [selectedChartOptions, setSelectedChartOptions] = useState<string[]>([])
   const [selectedPlotOptions, setSelectedPlotOptions] = useState<string[]>([])
-
+  const [loadingOption, setLoadingOption] = useState<string | null>(null);
+  
   const router = useRouter();  
 
   const handleTestDataChange = (category: "genomes" | "otherDatasets", option?: string) => {
@@ -31,14 +33,36 @@ export function QuickSelector() {
     }))
   }
 
-  const handleOptionClick = (option: string, type: "chart" | "plot") => {
+  // Send selected metric to backend using Axios
+  const handleOptionClick = async (option: string, type: "chart" | "plot") => {
+    setLoadingOption(option);
+    const setter = type === "chart" ? setSelectedChartOptions : setSelectedPlotOptions;
+
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/dashboard/plot", {
+        name: option.toLowerCase(),
+      });
+
+      if (response.status !== 200) throw new Error("Failed to fetch data");
+
+      setter((prev) => (prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]));
+
+      if (type === "chart") router.push("/chart");
+    } catch (error) {
+      console.error("Error sending request:", error);
+    } finally {
+      setLoadingOption(null);
+    }
+  };
+
+  /*const handleOptionClick = (option: string, type: "chart" | "plot") => {
     const setter = type === "chart" ? setSelectedChartOptions : setSelectedPlotOptions
     /*const current = type === "chart" ? selectedChartOptions : selectedPlotOptions*/
-    setter((prev) => (prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]))
+   /* setter((prev) => (prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]))
     if (type === "chart") {
       router.push("/chart");  
     }    
-  }
+  }*/
 
   return (
     <div className="bg-[#F5FFF5] border border-[#D1FFD1] rounded-lg p-6 mb-8">
