@@ -40,9 +40,8 @@ const CompressionChart: React.FC<ChartProps> = ({
     };
   });
 
-   // Calculate dynamic chart width based on the number of data points
-   const chartWidth = Math.max(ids.length * 50, 1000); // 50px per bar, minimum width 1000px
-
+  // Calculate dynamic chart width based on the number of data points
+  const chartWidth = Math.max(ids.length * 50, 1000); // 50px per bar, minimum width 1000px
 
   const options: ApexOptions = {
     chart: {
@@ -51,10 +50,19 @@ const CompressionChart: React.FC<ChartProps> = ({
       stacked: false,
       toolbar: {
         show: true,
+        tools: {
+          zoom: true,
+          zoomin: true,
+          zoomout: true,
+          pan: true,
+          reset: true,
+        }
       },
       zoom: {
-        enabled: true
-      }
+        enabled: true,
+        type: 'x', // Enables zooming along x-axis
+        autoScaleYaxis: true,
+      },
     },
     responsive: [{
       breakpoint: 480,
