@@ -66,7 +66,7 @@ export function QuickSelector() {
         </div>
 
         {/* Types Section */}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* <div className="flex flex-wrap items-center gap-2">
           <span className="text-[#800000] font-medium">Types</span>
           <div className="flex gap-3">
             {Object.entries(testData.otherDatasets).map(([type, checked]) => (
@@ -81,7 +81,7 @@ export function QuickSelector() {
               </label>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* Metrics Section */}
         <div className="flex items-start space-x-4">
