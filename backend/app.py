@@ -26,7 +26,7 @@ def test_api():
     """
     return {"message": "API is working"}
 
-@app.post("/dashboard/plot")
+@app.post("/dashboard/chart/barchart")
 def get_plot(MetricsPlotData: MetricsPlotData):
     """
     Endpoint to generate a plot based on the provided data name.    
