@@ -3,7 +3,7 @@
 import { Header } from "../../components/header";
 import CompressionChart from "../../components/CompressionChart";
 import { useState, useEffect } from "react";
-import rawData from "../../data/plot_metadata/compression_ratio.json"
+import rawData from "../../../data/plot_metadata/compression_ratio.json"
 
 function decodeBdata(bdata: string): number[] {
     const binaryString = atob(bdata);
