@@ -6,16 +6,15 @@ import { useState, useEffect } from "react";
 import rawData from "../../assets/compression_ratio.json"
 
 function decodeBdata(bdata: string): number[] {
-    const binaryString = atob(bdata);
-    const byteArray = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
+  const binaryString = atob(bdata);
+  const byteArray = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
       byteArray[i] = binaryString.charCodeAt(i);
-    }
-    const floatArray = new Float64Array(byteArray.buffer);
-    return Array.from(floatArray);
   }
+  return Array.from(byteArray);
+}
   
-  function parseData(rawData: any) {
+function parseData(rawData: any) {
     if (!rawData || !Array.isArray(rawData.data)) return [];
   
     const parsedData: any[] = [];
@@ -34,7 +33,7 @@ function decodeBdata(bdata: string): number[] {
     });
   
     return parsedData;
-  }
+}
 export default function VisualizationPage() {
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
