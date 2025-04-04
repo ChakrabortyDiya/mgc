@@ -19,6 +19,13 @@ app.add_middleware(
 
 plot_generator = PlotGenerator()
 
+@app.get("/dashboard/test")
+def test_api():
+    """
+    Endpoint to test API responsiveness.
+    """
+    return {"message": "API is working"}
+
 @app.post("/dashboard/plot")
 def get_plot(MetricsPlotData: MetricsPlotData):
     """
