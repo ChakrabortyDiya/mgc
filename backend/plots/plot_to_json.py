@@ -68,7 +68,7 @@ class PlotGenerator:
         
         # Here you can expand to support other data sources
         if data_name.lower() == 'compression ratio':
-            csv_file = r'backend\data\compression_data.csv'
+            csv_file = r'backend\data\Result_data\C.Size.csv'
             json_dir = r'backend\data\plot_metadata'
             return self.generate_plot(csv_file, json_dir)
         else:
