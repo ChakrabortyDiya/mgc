@@ -6,7 +6,20 @@ import axios from "axios";
 
 export function QuickSelector() {
   const [testData, setTestData] = useState({
-    genomes: { DNA: true, RNA: false },
+    genomes: {
+      DNA_Corpus: {
+        size: "DNA Corpus(raw)",
+        checked: false,
+      },
+      DNA: {
+        size: "DNA(FASTA)",
+        checked: false,
+      },
+      RNA: {
+        size: "RNA(FASTA)",
+        checked: false,
+      },
+    },
     otherDatasets: { RawFASTA: false, MultiFASTA: false, FASTQ: false },
   });
 
@@ -51,15 +64,15 @@ export function QuickSelector() {
         <div className="flex flex-wrap items-center gap-6">
           <span className="text-[#006400] font-medium">Benchmark dataset</span>
           <div className="flex gap-4">
-            {Object.entries(testData.genomes).map(([size, checked]) => (
+          {Object.entries(testData.genomes).map(([size, data]: [string, { size: string; checked: boolean }]) => (
               <label key={size} className="inline-flex items-center">
                 <input
                   type="checkbox"
-                  checked={checked}
+                  checked={data.checked}
                   onChange={() => handleTestDataChange("genomes", size)}
                   className="form-checkbox text-[#4A6EA9]"
                 />
-                <span className="ml-1 text-[#006400]">{size}</span>
+                <span className="ml-1 text-[#006400]">{data.size}</span>
               </label>
             ))}
           </div>
