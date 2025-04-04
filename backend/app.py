@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any
 import subprocess, json
-from backend.utils import ScatterPlotData, MetricsPlotData
-from backend.plots.plot_to_json import PlotGenerator
+from utils import ScatterPlotData, MetricsPlotData
+from plots.plot_to_json import PlotGenerator
 
 app = FastAPI()
 
