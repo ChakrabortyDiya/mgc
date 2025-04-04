@@ -4,6 +4,8 @@ import { Header } from "../../components/header";
 import CompressionChart from "../../components/CompressionChart";
 import { useState, useEffect } from "react";
 import rawData from "../../assets/compression_ratio.json"
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 function decodeBdata(bdata: string): number[] {
   const binaryString = atob(bdata);
@@ -13,7 +15,7 @@ function decodeBdata(bdata: string): number[] {
   }
   return Array.from(byteArray);
 }
-  
+
 function parseData(rawData: any) {
     if (!rawData || !Array.isArray(rawData.data)) return [];
   
@@ -37,6 +39,30 @@ function parseData(rawData: any) {
 export default function VisualizationPage() {
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+const router = useRouter();
+const [selectedChartOptions, setSelectedChartOptions] = useState<string[]>([]);
+const [selectedPlotOptions, setSelectedPlotOptions] = useState<string[]>([]);
+
+// generate graph data
+
+  const generateGraphData = async (option: string, type: "chart" | "plot") => {
+    const setter = type === "chart" ? setSelectedChartOptions : setSelectedPlotOptions;
+  
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/dashboard/plot", {
+        name: option.toLowerCase(),
+      });
+  
+      if (response.status !== 200) throw new Error("Failed to fetch data");
+  
+      setter((prev) => (prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]));
+  
+      if (type === "chart") router.push("/chart");
+    } catch (error) {
+      console.error("Error sending request:", error);
+    }
+  };
 
 useEffect(() => {
     const parsedData = parseData(rawData);

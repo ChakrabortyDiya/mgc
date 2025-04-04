@@ -37,24 +37,7 @@ export function QuickSelector() {
   };
 
   // Handle option selection and API request
-  const handleOptionClick = async (option: string, type: "chart" | "plot") => {
-    const setter = type === "chart" ? setSelectedChartOptions : setSelectedPlotOptions;
-
-    try {
-      const response = await axios.post("http://127.0.0.1:8000/dashboard/plot", {
-        name: option.toLowerCase(),
-      });
-
-      if (response.status !== 200) throw new Error("Failed to fetch data");
-
-      setter((prev) => (prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]));
-
-      if (type === "chart") router.push("/chart");
-    } catch (error) {
-      console.error("Error sending request:", error);
-    }
-  };
-
+  
   return (
     <div className="bg-[#F5FFF5] border border-[#D1FFD1] rounded-lg p-6 mb-8">
       <h2 className="text-2xl font-semibold text-center text-[#008080] mb-6">Dashboard</h2>
@@ -111,7 +94,7 @@ export function QuickSelector() {
             ].map((option) => (
               <button
                 key={option}
-                onClick={() => handleOptionClick(option, "chart")}
+                onClick={() => router.push("/chart")}
                 className={`px-4 py-1 rounded-full border text-sm ${
                   selectedChartOptions.includes(option) ? "bg-[#4A6EA9] text-white" : "bg-white text-gray-700"
                 } hover:bg-gray-50`}
@@ -129,7 +112,7 @@ export function QuickSelector() {
             {["Compression Ratio -vs- Decompression Time"].map((option) => (
               <button
                 key={option}
-                onClick={() => handleOptionClick(option, "plot")}
+                // onClick={() => handleOptionClick(option, "plot")}
                 className={`px-4 py-1 rounded-full border text-sm ${
                   selectedPlotOptions.includes(option) ? "bg-[#4A6EA9] text-white" : "bg-[#FFF5EE] text-gray-700"
                 } hover:bg-gray-50`}
