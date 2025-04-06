@@ -1,3 +1,4 @@
 backend\plots\__pycache__
 backend\plots\*.cpython-*.pyc
 backend\plots\tempCodeRunnerFile.py
+backend\.env
