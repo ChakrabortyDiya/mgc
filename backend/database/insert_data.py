@@ -34,9 +34,9 @@ def truncate_tables():
             cursor.execute("TRUNCATE TABLE dashboard_data CASCADE;")
             cursor.execute("TRUNCATE TABLE result_comparison CASCADE;")
             conn.commit()
-        print("✅ Tables truncated successfully")
+        print("Tables truncated successfully")
     except Exception as e:
-        print(f"❌ Truncate failed: {e}")
+        print(f"Truncate failed: {e}")
     finally:
         conn.close()
 
@@ -124,17 +124,16 @@ def process_file(file_path, conn):
                     insert_row(cursor, data)
                 except Exception as err:
                     conn.rollback()
-                    print(
-                        f"⚠️ Error in {filename} | {dataset_id} | {compressor} → {err}")
+                    print(f"Error in {filename} | {dataset_id} | {compressor} → {err}")
                     continue
 
         conn.commit()
         cursor.close()
-        print(f"✅ Processed: {filename}")
+        print(f"Processed: {filename}")
 
     except Exception as e:
         skipped_files.append((filename, str(e)))
-        print(f"❌ Skipped {filename}: {e}")
+        print(f"Skipped {filename}: {e}")
 
 
 def process_all_files():
@@ -145,11 +144,11 @@ def process_all_files():
     conn.close()
 
     if skipped_files:
-        print("\n⚠️ Skipped Files:")
+        print("\nSkipped Files:")
         for name, reason in skipped_files:
             print(f" - {name}: {reason}")
     else:
-        print("\n✅ All files processed.")
+        print("\nAll files processed.")
 
 
 def export_to_csv():
@@ -157,13 +156,13 @@ def export_to_csv():
         engine = create_engine(DATABASE_URL)
         df = pd.read_sql("SELECT * FROM result_comparison", engine)
         df.to_csv("exported_result_comparison.csv", index=False)
-        print("📁 Exported result_comparison.csv")
+        print("Exported result_comparison.csv")
     except Exception as e:
-        print(f"❌ Export failed: {e}")
+        print(f"Export failed: {e}")
 
 
 if __name__ == "__main__":
-    print("🚀 Starting data insertion process...")
+    print("Starting data insertion process...")
     truncate_tables()
     process_all_files()
     export_to_csv()

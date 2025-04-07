@@ -22,23 +22,23 @@ def truncate_tables():
     try:
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
-        print("✅ Connected to PostgreSQL")
+        print("Connected to PostgreSQL")
 
         cursor.execute("TRUNCATE TABLE dashboard_data CASCADE;")
         cursor.execute("TRUNCATE TABLE result_comparison CASCADE;")
         conn.commit()
 
-        print("🧹 Tables `dashboard_data` and `result_comparison` truncated.")
+        print("Tables `dashboard_data` and `result_comparison` truncated.")
 
     except Exception as e:
-        print(f"❌ Error while truncating tables: {e}")
+        print(f"Error while truncating tables: {e}")
 
     finally:
         if 'cursor' in locals():
             cursor.close()
         if 'conn' in locals():
             conn.close()
-        print("🔒 Connection closed")
+        print("Connection closed")
 
 
 def export_data_to_csv():
@@ -46,14 +46,14 @@ def export_data_to_csv():
     try:
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
-        print("✅ Connected to PostgreSQL")
+        print("Connected to PostgreSQL")
 
         # Fetch all data
         cursor.execute("SELECT * FROM result_comparison")
         rows = cursor.fetchall()
 
         if not rows:
-            print("⚠️ No data found in result_comparison table.")
+            print("No data found in result_comparison table.")
             return
 
         # Write to CSV
@@ -61,17 +61,17 @@ def export_data_to_csv():
             writer = csv.writer(file)
             writer.writerow(COLUMNS)
             writer.writerows(rows)
-            print(f"📁 Data exported to: {EXPORT_PATH}")
+            print(f"Data exported to: {EXPORT_PATH}")
 
     except Exception as e:
-        print(f"❌ Error during export: {e}")
+        print(f"Error during export: {e}")
 
     finally:
         if 'cursor' in locals():
             cursor.close()
         if 'conn' in locals():
             conn.close()
-        print("🔒 Connection closed")
+        print("Connection closed")
 
 
 if __name__ == "__main__":

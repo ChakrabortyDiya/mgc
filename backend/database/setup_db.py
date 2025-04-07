@@ -11,11 +11,11 @@ def reset_database():
         conn = psycopg2.connect(DATABASE_URL)
         cur = conn.cursor()
 
-        print("🧹 Dropping old tables if they exist...")
+        print(" Dropping old tables if they exist...")
         cur.execute("DROP TABLE IF EXISTS result_comparison CASCADE;")
         cur.execute("DROP TABLE IF EXISTS dashboard_data CASCADE;")
 
-        print("🧱 Creating new tables...")
+        print(" Creating new tables...")
 
         cur.execute("""
             CREATE TABLE result_comparison (
@@ -46,10 +46,10 @@ def reset_database():
         """)
 
         conn.commit()
-        print("✅ Tables recreated successfully!")
+        print("Tables recreated successfully!")
 
     except Exception as e:
-        print(f"❌ Error setting up database: {e}")
+        print(f"Error setting up database: {e}")
     finally:
         cur.close()
         conn.close()
