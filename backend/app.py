@@ -8,6 +8,7 @@ import os
 from dotenv import load_dotenv
 from utils import ScatterPlotData, MetricsPlotData
 from plots.plot_to_json import PlotGenerator
+from routes import result_routes
 
 # Load environment variables
 load_dotenv()
@@ -41,3 +42,5 @@ def get_plot(MetricsPlotData: MetricsPlotData):
         return json.loads(json_data)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+app.include_router(result_routes.router)

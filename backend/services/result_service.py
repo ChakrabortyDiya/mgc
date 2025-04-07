@@ -1,36 +1,35 @@
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from database.models import ResultData
+from database.models import ResultComparison
+from fastapi import HTTPException
+from typing import List
+from sqlalchemy import and_
 
-
-class ResultService:
+class DashboardService:
     @staticmethod
-    def get_results(db: Session):
-        return db.query(ResultData).all()
+    def fetch_grouped_results(db: Session, input_data):
+        results = []
 
-    @staticmethod
-    def create_result(db: Session, result_data):
-        new_result = ResultData(name=result_data.name,
-                                json_data=result_data.json_data)
-        db.add(new_result)
-        db.commit()
-        db.refresh(new_result)
-        return new_result
+        for i in range(len(input_data.id)):
+            query = db.query(ResultComparison).filter(
+                and_(
+                    ResultComparison.dataset_id == input_data.id[i],
+                    ResultComparison.compressor == input_data.comp_name[i],
+                    ResultComparison.compressor_type == str(input_data.comp_type[i])
+                )
+            ).first()
 
-    @staticmethod
-    def get_result_by_id(db: Session, result_id: int):
-        result = db.query(ResultData).filter(
-            ResultData.id == result_id).first()
-        if not result:
-            raise HTTPException(status_code=404, detail="Result not found")
-        return result
+            if not query:
+                continue
 
-    @staticmethod
-    def delete_result(db: Session, result_id: int):
-        result = db.query(ResultData).filter(
-            ResultData.id == result_id).first()
-        if not result:
-            raise HTTPException(status_code=404, detail="Result not found")
-        db.delete(result)
-        db.commit()
-        return {"message": "Result deleted successfully"}
+            result_dict = {
+                "dataset_id": query.dataset_id,
+                "compressor": query.compressor,
+                "compressor_type": query.compressor_type
+            }
+
+            for metric in input_data.metric:
+                result_dict[metric] = getattr(query, metric, None)
+
+            results.append(result_dict)
+
+        return results
