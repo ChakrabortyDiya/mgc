@@ -1,5 +1,4 @@
-ID,7-zip,,paq8,,bsc,,gzip,,zstd,,bzip2,,zpaq,,cmix,,
-,S-7-zip,P-7-zip,S-paq8,P-paq8,S-bsc,P-bsc,S-gzip,P-gzip,S-zstd,P-zstd,S-bzip2,P-bzip2,S-zpaq,P-zpaq,S-cmix,P-cmix,
+ID,S-7-zip,P-7-zip,S-paq8,P-paq8,S-bsc,P-bsc,S-gzip,P-gzip,S-zstd,P-zstd,S-bzip2,P-bzip2,S-zpaq,P-zpaq,S-cmix,P-cmix,
 BuEb,8,32,2040,260,284,72,24,72,1252,292,1252,292,1252,0,0,0,kb
 AgPh,390,0,0,24,748,0,16,552,260,260,804,260,0,0,0,0,
 YeMi,244,0,484,0,168,0,72,0,848,0,868,0,0,0,0,0,
