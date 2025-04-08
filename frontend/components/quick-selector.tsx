@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+
 
 export function QuickSelector() {
   const [testData, setTestData] = useState({
@@ -23,8 +23,8 @@ export function QuickSelector() {
     otherDatasets: { RawFASTA: false, MultiFASTA: false, FASTQ: false },
   });
 
-  const [selectedChartOptions, setSelectedChartOptions] = useState<string[]>([]);
-  const [selectedPlotOptions, setSelectedPlotOptions] = useState<string[]>([]);
+  const [selectedChartOptions] = useState<string[]>([]);
+  const [selectedPlotOptions] = useState<string[]>([]);
 
   const router = useRouter();
 
@@ -40,7 +40,7 @@ export function QuickSelector() {
   
   return (
     <div className="bg-[#F5FFF5] border border-[#D1FFD1] rounded-lg p-6 mb-8">
-      <h2 className="text-2xl font-semibold text-center text-[#008080] mb-6">Dashboard</h2>
+      <h2 className="text-2xl font-semibold text-center text-[#008080] mb-6">Result Comparison Using Graph</h2>
 
       <div className="space-y-6">
         {/* Benchmark Dataset Section */}
@@ -94,7 +94,7 @@ export function QuickSelector() {
             ].map((option) => (
               <button
                 key={option}
-                onClick={() => router.push("/chart")}
+                onClick={() => router.push(`/${option.toLowerCase().replace(/\s+/g, "_")}`)}
                 className={`px-4 py-1 rounded-full border text-sm ${
                   selectedChartOptions.includes(option) ? "bg-[#4A6EA9] text-white" : "bg-white text-gray-700"
                 } hover:bg-gray-50`}

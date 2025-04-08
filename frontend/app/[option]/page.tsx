@@ -3,8 +3,8 @@
 import { Header } from "../../components/header";
 import CompressionChart from "../../components/CompressionChart";
 import { useState, useEffect } from "react";
-import rawData from "../../assets/compression_ratio.json"
-import { useRouter } from "next/navigation";
+// import rawData from "../../assets/compression_ratio.json"
+import { useSearchParams, useRouter } from "next/navigation";
 import axios from "axios";
 
 function decodeBdata(bdata: string): number[] {
@@ -40,17 +40,18 @@ export default function VisualizationPage() {
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-const router = useRouter();
-const [selectedChartOptions, setSelectedChartOptions] = useState<string[]>([]);
+const searchParams = useSearchParams();
+const option = searchParams.get("option");
+const [selectedChartOptions,setSelectedChartOptions] = useState<string[]>([]);
 const [selectedPlotOptions, setSelectedPlotOptions] = useState<string[]>([]);
 
 // generate graph data
 
-  const generateGraphData = async (option: string, type: "chart" | "plot") => {
-    const setter = type === "chart" ? setSelectedChartOptions : setSelectedPlotOptions;
+  const generateGraphData = async (option: string, type: "barchart" | "plot") => {
+    const setter = type === "barchart" ? setSelectedChartOptions : setSelectedPlotOptions;
   
     try {
-      const response = await axios.post("http://127.0.0.1:8000/dashboard/plot", {
+      const response = await axios.post(`http://127.0.0.1:8000/dashboard/${type}`, {
         name: option.toLowerCase(),
       });
   
@@ -58,17 +59,17 @@ const [selectedPlotOptions, setSelectedPlotOptions] = useState<string[]>([]);
   
       setter((prev) => (prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]));
   
-      if (type === "chart") router.push("/chart");
     } catch (error) {
       console.error("Error sending request:", error);
     }
   };
 
 useEffect(() => {
+  const rawData = generateGraphData(option || "defaultOption", "barchart");
     const parsedData = parseData(rawData);
     setData(parsedData);
     setIsLoading(false);
-  }, []);
+  }, [option]);
 
   return (
     <div className="min-h-screen bg-white">

@@ -46,7 +46,7 @@ export function OutputConfiguration() {
         </div>
 
         {/* Scatterplot Configuration */}
-        <div className="space-y-4">
+        {/* <div className="space-y-4">
           <h4 className="text-lg font-medium">Scatterplot</h4>
           <div className="space-y-4">
             <div>
@@ -65,8 +65,8 @@ export function OutputConfiguration() {
 
             <Button variant="outline" className="w-full sm:w-auto">Show scatterplot</Button>
           </div>
-        </div>
-      </div>
+        </div> */}
+      </div> 
 
       <footer className="text-center text-sm text-gray-600 pt-8">
         By <a href="#" className="text-blue-600 hover:underline">Contributors</a>, 2023-2026, public domain

@@ -60,7 +60,7 @@ export function CustomComparison() {
 
   return (
     <div className="space-y-8">
-      <h2 className="text-2xl font-semibold text-center text-[#4A6EA9]">Result Comparison</h2>
+      <h2 className="text-2xl font-semibold text-center text-[#4A6EA9]">Result Comparison Using Table</h2>
 
       <div className="space-y-6">
         <h3 className="text-lg font-medium text-gray-700">Step 1. Select datasets</h3>
