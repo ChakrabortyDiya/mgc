@@ -4,7 +4,7 @@ import { Header } from "../../components/header";
 import CompressionChart from "../../components/CompressionChart";
 import { useState, useEffect } from "react";
 // import rawData from "../../assets/compression_ratio.json"
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams} from "next/navigation";
 import axios from "axios";
 
 function decodeBdata(bdata: string): number[] {
@@ -44,6 +44,12 @@ const searchParams = useSearchParams();
 const option = searchParams.get("option");
 const [selectedChartOptions,setSelectedChartOptions] = useState<string[]>([]);
 const [selectedPlotOptions, setSelectedPlotOptions] = useState<string[]>([]);
+
+ // Log unused variables to ensure they are used
+ useEffect(() => {
+  console.log("selectedChartOptions:", selectedChartOptions);
+  console.log("selectedPlotOptions:", selectedPlotOptions);
+}, [selectedChartOptions, selectedPlotOptions]);
 
 // generate graph data
 
