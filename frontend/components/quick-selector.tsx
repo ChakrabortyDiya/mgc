@@ -20,7 +20,6 @@ export function QuickSelector() {
         checked: false,
       },
     },
-    otherDatasets: { RawFASTA: false, MultiFASTA: false, FASTQ: false },
   });
 
   const [selectedChartOptions] = useState<string[]>([]);
@@ -29,13 +28,22 @@ export function QuickSelector() {
   const router = useRouter();
 
   // Toggle test data selection
-  const handleTestDataChange = (category: "genomes" | "otherDatasets", option: string) => {
-    setTestData((prev) => ({
-      ...prev,
-      [category]: { ...prev[category], [option as keyof typeof prev[typeof category]]: !prev[category][option as keyof typeof prev[typeof category]] },
-    }));
-  };
-
+  const handleTestDataChange = (category: keyof typeof testData, option: string) => {
+      setTestData((prev) => {
+        const currentOption = prev[category][option as keyof typeof prev[typeof category]];
+        return {
+          ...prev,
+          [category]: {
+            ...prev[category],
+            [option]: {
+              ...currentOption,
+              checked: !currentOption.checked,
+            },
+          },
+        };
+      });
+    };
+  
   // Handle option selection and API request
   
   return (
