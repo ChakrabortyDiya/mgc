@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 from database.models import ResultComparison
 from fastapi import HTTPException
-from typing import List
 from sqlalchemy import and_
 
 class DashboardService:
@@ -9,27 +8,37 @@ class DashboardService:
     def fetch_grouped_results(db: Session, input_data):
         results = []
 
-        for i in range(len(input_data.id)):
-            query = db.query(ResultComparison).filter(
-                and_(
-                    ResultComparison.dataset_id == input_data.id[i],
-                    ResultComparison.compressor == input_data.comp_name[i],
-                    ResultComparison.compressor_type == str(input_data.comp_type[i])
-                )
-            ).first()
+        # Map indexes to actual compressor types
+        comp_type_map = {0: "standard", 1: "proposed"}
+        selected_types = [comp_type_map[i]
+                          for i, flag in enumerate(input_data.comp_type) if flag == 1]
 
-            if not query:
-                continue
+        for dataset_id in input_data.id:
+            for comp_name in input_data.comp_name:
+                for comp_type_str in selected_types:
+                    query = db.query(ResultComparison).filter(
+                        and_(
+                            ResultComparison.dataset_id == dataset_id,
+                            ResultComparison.compressor == comp_name,
+                            ResultComparison.compressor_type == comp_type_str
+                        )
+                    ).first()
 
-            result_dict = {
-                "dataset_id": query.dataset_id,
-                "compressor": query.compressor,
-                "compressor_type": query.compressor_type
-            }
+                    if not query:
+                        continue
 
-            for metric in input_data.metric:
-                result_dict[metric] = getattr(query, metric, None)
+                    result_dict = {
+                        "dataset_id": query.dataset_id,
+                        "compressor": query.compressor,
+                        "compressor_type": query.compressor_type
+                    }
 
-            results.append(result_dict)
+                    for metric in input_data.metric:
+                        if hasattr(query, metric):
+                            result_dict[metric] = getattr(query, metric)
+                        else:
+                            result_dict[metric] = None
+
+                    results.append(result_dict)
 
         return results

@@ -43,4 +43,6 @@ def get_plot(MetricsPlotData: MetricsPlotData):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+
 app.include_router(result_routes.router)
