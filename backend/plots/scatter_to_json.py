@@ -74,7 +74,7 @@ class ScatterPlotGenerator:
         return self.generate_scatter_plot(json_dir)
 
 
-# Uncomment this to test directly
-if __name__ == "__main__":
-    plot_gen = ScatterPlotGenerator()
-    plot_gen.generate_and_save()
+# # Uncomment this to test directly
+# if __name__ == "__main__":
+#     plot_gen = ScatterPlotGenerator()
+#     plot_gen.generate_and_save()
