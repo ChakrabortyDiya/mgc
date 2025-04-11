@@ -4,7 +4,7 @@ import { Header } from "../../components/header";
 import CompressionChart from "../../components/CompressionChart";
 import { useState, useEffect } from "react";
 // import rawData from "../../assets/compression_ratio.json"
-import { useSearchParams, useParams } from "next/navigation"; // update import
+import { useParams } from "next/navigation"; // update import
 import axios from "axios";
 
 function decodeBdata(bdata: string): number[] {
