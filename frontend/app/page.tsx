@@ -1,9 +1,10 @@
 import { Header } from "../components/header"
 import { WelcomeBox } from "../components/welcome-box"
 import { QuickSelector } from "../components/quick-selector"
-import { CustomComparison } from "../components/custom-comparison"
-import { CompressorSelector } from "../components/compressor-selector"
-import { OutputConfiguration } from "../components/output-configuration"
+// import { CustomComparison } from "../components/custom-comparison"
+// import { CompressorSelector } from "../components/compressor-selector"
+// import { OutputConfiguration } from "../components/output-configuration"
+import ComparisonPage from "../components/ComparisonPage"
 
 export default function Page() {
   return (
@@ -14,9 +15,9 @@ export default function Page() {
         <WelcomeBox />
         <QuickSelector />
         <div className="space-y-8">
-          <CustomComparison />
-          <CompressorSelector />
-          <OutputConfiguration />
+          <ComparisonPage />
+          {/* <CompressorSelector />
+          <OutputConfiguration selectedGenomes={[]} /> */}
         </div>
       </main>
     </div>

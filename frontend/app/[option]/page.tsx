@@ -4,7 +4,7 @@ import { Header } from "../../components/header";
 import CompressionChart from "../../components/CompressionChart";
 import { useState, useEffect } from "react";
 // import rawData from "../../assets/compression_ratio.json"
-import { useSearchParams} from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation"; // update import
 import axios from "axios";
 
 function decodeBdata(bdata: string): number[] {
@@ -37,44 +37,60 @@ function parseData(rawData: any) {
     return parsedData;
 }
 export default function VisualizationPage() {
-  const [data, setData] = useState<any[]>([]);
+  // const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-const searchParams = useSearchParams();
-const option = searchParams.get("option");
-const [selectedChartOptions,setSelectedChartOptions] = useState<string[]>([]);
-const [selectedPlotOptions, setSelectedPlotOptions] = useState<string[]>([]);
+  // const searchParams = useSearchParams();
+  // Removed use of useRouter and use useParams instead
+  const { option } = useParams(); // using new hook
 
- // Log unused variables to ensure they are used
- useEffect(() => {
-  console.log("selectedChartOptions:", selectedChartOptions);
-  console.log("selectedPlotOptions:", selectedPlotOptions);
-}, [selectedChartOptions, selectedPlotOptions]);
+  const [selectedChartOptions, setSelectedChartOptions] = useState<string[]>([]);
+  const [selectedPlotOptions, setSelectedPlotOptions] = useState<string[]>([]);
 
-// generate graph data
+  // Log unused variables to ensure they are used
+  useEffect(() => {
+    console.log("selectedChartOptions:", selectedChartOptions);
+    console.log("selectedPlotOptions:", selectedPlotOptions);
+  }, [selectedChartOptions, selectedPlotOptions]);
 
+  // generate graph data
   const generateGraphData = async (option: string, type: "barchart" | "plot") => {
     const setter = type === "barchart" ? setSelectedChartOptions : setSelectedPlotOptions;
   
     try {
-      const response = await axios.post(`http://127.0.0.1:8000/dashboard/${type}`, {
-        name: option.toLowerCase(),
+      const response = await axios.post(`http://127.0.0.1:8000/dashboard/chart/${type}`, {
+        name: option?.toLowerCase() || "",
       });
   
-      if (response.status !== 200) throw new Error("Failed to fetch data");
+      if (response.status !== 200) {
+        console.error("Server responded with status:", response.status, response.data);
+        throw new Error("Failed to fetch data");
+      }
   
-      setter((prev) => (prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]));
+      setter(response.data);
   
     } catch (error) {
-      console.error("Error sending request:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Error sending request:", error.message, "Response:", error.response?.data);
+      } else {
+        console.error("Unexpected error:", error);
+      }
     }
   };
 
-useEffect(() => {
-  const rawData = generateGraphData(option || "defaultOption", "barchart");
-    const parsedData = parseData(rawData);
-    setData(parsedData);
-    setIsLoading(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log("Selected option:", option);
+      if (option) {
+        await generateGraphData(
+          (typeof option === "string" ? option.replace("_", " ") : "") || "",
+          "barchart"
+        );
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, [option]);
 
   return (
@@ -92,7 +108,7 @@ useEffect(() => {
             </div>
           ) : (
             <CompressionChart 
-              data={data}
+              data={parseData(selectedChartOptions)}
               title="Compression Performance Comparison"
               xAxisTitle="Datasets"
               yAxisTitle="Compression Ratio"

@@ -4,23 +4,31 @@ import { useState } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 
-export function CompressorSelector() {
+interface CompressorTypes {
+  proposed: boolean;
+  standard: boolean;
+}
+
+export function CompressorSelector({
+  compressorTypes,
+  setCompressorTypes,
+}: {
+  compressorTypes: CompressorTypes;
+  setCompressorTypes: React.Dispatch<React.SetStateAction<CompressorTypes>>;
+}) {
   /*const [showTop, setShowTop] = useState(false)
   const [showRelative, setShowRelative] = useState(false)*/
-  const [compressorTypes, setCompressorTypes] = useState({
-    proposed: true,
-    standard: true,
-  })
+  
   /*const [bestSettingsCount, setBestSettingsCount] = useState(1)
   const [linkSpeed, setLinkSpeed] = useState(100)
   const [relativeCompressor, setRelativeCompressor] = useState("gzip-9")*/
-  const [selectedProposed, setSelectedProposed] = useState<string[]>([])
+    // Removed redundant line causing error
   const [selectedStandard, setSelectedStandard] = useState<string[]>([])
-  /*const [selectedSettings, setSelectedSettings] = useState<string[]>([])*/
+  const [selectedProposed, setSelectedProposed] = useState<string[]>([])
 
-  const handleCompressorTypeChange = (type: "proposed" | "standard") => {
+  const handleCompressorTypeChange = (type: "standard" | "proposed") => {
     setCompressorTypes((prev) => ({ ...prev, [type]: !prev[type] }))
-    console.log(`${type} compressors ${compressorTypes[type] ? "unchecked" : "checked"}`)
+   
   }
 
   /*const handleShowTopChange = (checked: boolean) => {
@@ -66,15 +74,15 @@ export function CompressorSelector() {
             <div className="space-y-2">
               <label className="flex items-center space-x-2">
                 <Checkbox
-                  checked={compressorTypes.proposed}
-                  onCheckedChange={() => handleCompressorTypeChange("proposed")}
+                  checked={compressorTypes.standard}
+                  onCheckedChange={() => handleCompressorTypeChange("standard")}
                 />
                 <span>Standard compressors</span>
               </label>
               <label className="flex items-center space-x-2">
                 <Checkbox
-                  checked={compressorTypes.standard}
-                  onCheckedChange={() => handleCompressorTypeChange("standard")}
+                  checked={compressorTypes.proposed}
+                  onCheckedChange={() => handleCompressorTypeChange("proposed")}
                 />
                 <span>Proposed compressors</span>
               </label>

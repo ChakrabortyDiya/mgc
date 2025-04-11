@@ -1,11 +1,18 @@
 "use client"
 
 /*import { useState } from "react"*/
-import { Button } from "@/components/ui/button"
+
 import { Label } from "@/components/ui/label"
 /*import { Checkbox } from "@/components/ui/checkbox"*/
 
+// type OutputConfigurationProps = {
+//   selectedGenomes: string[]
+// }
+
 export function OutputConfiguration() {
+  // const handleDisplayTableClick = () => {
+  //   console.log("Selected Genomes:", selectedGenomes)
+  // }
   /*const [chartSize, setChartSize] = useState({ width: 1500, height: 500 });*/
 
   return (
@@ -39,10 +46,6 @@ export function OutputConfiguration() {
               ))}
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button variant="outline" className="w-full sm:w-auto">Display table</Button>
-            <Button variant="outline" className="w-full sm:w-auto">Download table</Button>
-          </div>
         </div>
 
         {/* Scatterplot Configuration */}
@@ -67,10 +70,6 @@ export function OutputConfiguration() {
           </div>
         </div> */}
       </div> 
-
-      <footer className="text-center text-sm text-gray-600 pt-8">
-        By <a href="#" className="text-blue-600 hover:underline">Contributors</a>, 2023-2026, public domain
-      </footer>
     </div>
   );
 }
