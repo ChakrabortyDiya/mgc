@@ -33,6 +33,8 @@ def test_api():
 
 @router.post("/dashboard/data")
 def get_dashboard_data(data: TableData, db: Session = Depends(get_db)):
+    print("[INFO] Fetching dashboard data...")
+    print(f"[INFO] Data: {data}")
     try:
         return DashboardService.fetch_grouped_results(db, data)
     except Exception as e:
