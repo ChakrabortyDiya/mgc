@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect} from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 
@@ -12,9 +12,14 @@ interface CompressorTypes {
 export function CompressorSelector({
   compressorTypes,
   setCompressorTypes,
+  selectedStandard, setSelectedStandard, selectedProposed, setSelectedProposed
 }: {
   compressorTypes: CompressorTypes;
   setCompressorTypes: React.Dispatch<React.SetStateAction<CompressorTypes>>;
+  selectedStandard: string[];
+  setSelectedStandard: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedProposed: string[];
+  setSelectedProposed: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
   /*const [showTop, setShowTop] = useState(false)
   const [showRelative, setShowRelative] = useState(false)*/
@@ -23,13 +28,20 @@ export function CompressorSelector({
   const [linkSpeed, setLinkSpeed] = useState(100)
   const [relativeCompressor, setRelativeCompressor] = useState("gzip-9")*/
     // Removed redundant line causing error
-  const [selectedStandard, setSelectedStandard] = useState<string[]>([])
-  const [selectedProposed, setSelectedProposed] = useState<string[]>([])
+  
 
   const handleCompressorTypeChange = (type: "standard" | "proposed") => {
     setCompressorTypes((prev) => ({ ...prev, [type]: !prev[type] }))
-   
   }
+
+  useEffect(() => {
+    if(compressorTypes.standard === false) {
+      setSelectedStandard([])
+    }
+    if(compressorTypes.proposed === false) {
+      setSelectedProposed([])
+    }
+  },[compressorTypes])
 
   /*const handleShowTopChange = (checked: boolean) => {
     setShowTop(checked)
@@ -89,13 +101,14 @@ export function CompressorSelector({
             </div>
           </div>
 
-          <div className="flex-1">
+          <div className={`flex-1 ${!compressorTypes.standard && "blur-sm"} `}>
             <Label>Select standard compressor setting:</Label>
             <select
               multiple
               className="w-full h-64 border rounded mt-2"
-              value={selectedProposed}
-              onChange={(e) => setSelectedProposed(Array.from(e.target.selectedOptions, (option) => option.value))}
+              value={selectedStandard}
+              onChange={(e) => setSelectedStandard(Array.from(e.target.selectedOptions, (option) => option.value))}
+              disabled={!compressorTypes.standard}
             >
               <option>s-7zip</option>
               <option>s-paq8</option>
@@ -108,13 +121,14 @@ export function CompressorSelector({
             </select>
           </div>
 
-          <div className="flex-1">
+          <div className={`flex-1 ${!compressorTypes.proposed && "blur-sm"}`}>
             <Label>Select proposed compressor setting:</Label>
             <select
               multiple
               className="w-full h-64 border rounded mt-2"
-              value={selectedStandard}
-              onChange={(e) => setSelectedStandard(Array.from(e.target.selectedOptions, (option) => option.value))}
+              value={selectedProposed}
+              onChange={(e) => setSelectedProposed(Array.from(e.target.selectedOptions, (option) => option.value))}
+              disabled={!compressorTypes.proposed}
             >
               <option>p-7zip</option>
               <option>p-paq8</option>

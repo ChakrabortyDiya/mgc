@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 //   selectedGenomes: string[]
 // }
 
-export function OutputConfiguration() {
+export function OutputConfiguration({selectedMetrics, setSelectedMetrics}: {selectedMetrics: string[], setSelectedMetrics: React.Dispatch<React.SetStateAction<string[]>>}) {
   // const handleDisplayTableClick = () => {
   //   console.log("Selected Genomes:", selectedGenomes)
   // }
@@ -31,18 +31,30 @@ export function OutputConfiguration() {
             <Label>Metrics:</Label>
             <div className="flex flex-col space-y-2">
               {[
-                "Compression Ratio",
-                "Compression Time",
-                "Compression Memory",
-                "Compression CPU Usage",
-                "Decompression Time",
-                "Decompression Memory",
-                "Decompression CPU Usage",
+              "Compression Ratio",
+              "Compression Time",
+              "Compression Memory",
+              "Compression CPU Usage",
+              "Decompression Time",
+              "Decompression Memory",
+              "Decompression CPU Usage",
               ].map((column) => (
-                <label key={column} className="flex items-center space-x-2">
-                  <input type="checkbox" className="form-checkbox h-4 w-4" />
-                  <span>{column}</span>
-                </label>
+              <label key={column} className="flex items-center space-x-2">
+                <input
+                type="checkbox"
+                className="form-checkbox h-4 w-4"
+                value={column}
+                checked={selectedMetrics.includes(column)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                  setSelectedMetrics([...selectedMetrics, column])
+                  } else {
+                  setSelectedMetrics(selectedMetrics.filter((m) => m !== column))
+                  }
+                }}
+                />
+                <span>{column}</span>
+              </label>
               ))}
             </div>
           </div>

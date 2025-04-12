@@ -28,8 +28,8 @@ export function CustomComparison({
       const isIncluded = safePrev.includes(genome);
       const updated = isIncluded
         ? safePrev.filter((g) => g !== genome)
-        : [...safePrev, genome];
-      console.log(`Genome ${genome} ${isIncluded ? "deselected" : "selected"}`);
+        : [...safePrev, genome]; // Only keep the first part of the genome name
+      // console.log(`Genome ${genome} ${isIncluded ? "deselected" : "selected"}`);
       return updated;
     });
   };
@@ -38,7 +38,7 @@ export function CustomComparison({
     setSelectedDatasets((prev) => {
       const isIncluded = prev.includes(dataset);
       const updated = isIncluded ? prev.filter((d) => d !== dataset) : [...prev, dataset];
-      console.log(`Dataset ${dataset} ${isIncluded ? "deselected" : "selected"}`);
+      // console.log(`Dataset ${dataset} ${isIncluded ? "deselected" : "selected"}`);
       return updated;
     });
   };
