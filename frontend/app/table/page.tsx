@@ -1,24 +1,61 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import CustomTable from "../../components/CustomTable";
+import { useGlobalContext } from "@/components/GlobalContext";
+import { useRouter } from "next/navigation";
+
+export function parseColumns(records: Record<string, any>[]): string[] {
+  if (!records || records.length === 0) return [];
+  const columnSet = new Set<string>();
+  records.forEach((record) => {
+    Object.keys(record).forEach((key) => columnSet.add(key));
+  });
+  return Array.from(columnSet);
+}
+
+export function parseData(
+  records: Record<string, any>[]
+): Record<string, any>[] {
+  return records;
+}
 
 const TablePage: React.FC = () => {
-    const sampleColumns = ["ID", "O.Size", "7-zip", "paq8", "bsc"];
-    const sampleData = [
-      { ID: "BuEb", "O.Size": 18940, "7-zip": 5544, paq8: 4660, bsc: 4886 },
-      { ID: "AgPh", "O.Size": 43970, "7-zip": 12283, paq8: 10671, bsc: 11012 },
-      { ID: "CyAl", "O.Size": 31200, "7-zip": 8450, paq8: 7100, bsc: 7600 },
-      { ID: "DeXt", "O.Size": 27650, "7-zip": 6780, paq8: 5900, bsc: 6200 },
-      { ID: "EnLy", "O.Size": 50000, "7-zip": 15000, paq8: 13500, bsc: 14000 }
-    ];
-  
-    return (
-      <div className="container mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-4">Dynamic Table</h1>
-        <CustomTable columns={sampleColumns} data={sampleData} />
-      </div>
-    );
-  };
-  
-  export default TablePage;
+  const router = useRouter();
+  const { comparisonRecords } = useGlobalContext();
+  const [columns, setColumns] = React.useState<string[]>([]);
+  const [data, setData] = React.useState<Record<string, any>[]>([]);
+
+  useEffect(() => {
+    // Wait for comparisonRecords to load
+    if (comparisonRecords === undefined) return;
+
+    // Detect page refresh
+    const navigationEntries = performance.getEntriesByType("navigation");
+    const isReload =
+      navigationEntries.length > 0 &&
+      (navigationEntries[0] as PerformanceNavigationTiming).type === "reload";
+
+    // If refresh AND there's no data, redirect to "/"
+    if (isReload && (!comparisonRecords || comparisonRecords.length === 0)) {
+      router.replace("/");
+      return;
+    }
+
+    if (comparisonRecords.length > 0) {
+      const parsedColumns = parseColumns(comparisonRecords);
+      const parsedData = parseData(comparisonRecords);
+      setColumns(parsedColumns);
+      setData(parsedData);
+    }
+  }, [comparisonRecords, router]);
+
+  return (
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-4">Dynamic Table</h1>
+      <CustomTable columns={columns} data={data} />
+    </div>
+  );
+};
+
+export default TablePage;
