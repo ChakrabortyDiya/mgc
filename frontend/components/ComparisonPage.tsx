@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect} from "react";
 import { CustomComparison } from "./custom-comparison";
 import { CompressorSelector } from "./compressor-selector";
 import { OutputConfiguration } from "./output-configuration";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
-import CustomTable from "./CustomTable";
 import { useGlobalContext } from "./GlobalContext";
 import { useRouter } from "next/navigation";
 interface CompressorTypes {
