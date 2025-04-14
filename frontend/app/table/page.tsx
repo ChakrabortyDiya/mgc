@@ -5,7 +5,8 @@ import CustomTable from "../../components/CustomTable";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { useRouter } from "next/navigation";
 
-export function parseColumns(records: Record<string, any>[]): string[] {
+// Converted helper functions from exported functions to internal functions
+function parseColumns(records: Record<string, any>[]): string[] {
   if (!records || records.length === 0) return [];
   const columnSet = new Set<string>();
   records.forEach((record) => {
@@ -14,7 +15,7 @@ export function parseColumns(records: Record<string, any>[]): string[] {
   return Array.from(columnSet);
 }
 
-export function parseData(
+function parseData(
   records: Record<string, any>[]
 ): Record<string, any>[] {
   return records;
