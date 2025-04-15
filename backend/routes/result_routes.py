@@ -52,7 +52,7 @@ def get_plot(MetricsPlotData: MetricsPlotData):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/dashboard/chart/scatterplot")
+@router.post("/dashboard/chart/scatterplot")
 def get_scatter_plot():
     """Endpoint to generate a scatter plot based on the provided data."""
     try:
