@@ -39,9 +39,8 @@ def reset_database():
 
         cur.execute("""
             CREATE TABLE dashboard_data (
-                id SERIAL PRIMARY KEY,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                message TEXT
+            dataset_id TEXT PRIMARY KEY,
+            dataset_type TEXT DEFAULT 'dna'
             );
         """)
 
