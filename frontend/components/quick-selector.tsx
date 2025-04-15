@@ -28,7 +28,7 @@ export function QuickSelector() {
   );
   const [selectedPlotOptions, setSelectedPlotOptions] = useState<string[]>([]);
 
-  const router = useRouter();
+  // const router = useRouter();
 
   // Toggle test data selection
   const handleTestDataChange = (
@@ -93,7 +93,8 @@ export function QuickSelector() {
     }
   };
   const [isLoading, setIsLoading] = useState(false);
-
+  console.log(isLoading);
+  
   const fetchData = async (option: string, type: "barchart" | "scatterplot") => {
     console.log("Selected option:", option);
     if (option) {
