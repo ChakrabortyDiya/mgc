@@ -20,6 +20,14 @@ COLUMN_MAP = {
     "size": "ratio"
 }
 
+entries = [
+    ("BuEb", "dna"),
+    ("HaHi", "dna"),
+    ("AgPh", "dna"),
+    ("YeMi", "dna"),
+    ("AeCa", "dna")
+]
+
 skipped_files = []
 
 
@@ -159,10 +167,45 @@ def export_to_csv():
         print("Exported result_comparison.csv")
     except Exception as e:
         print(f"Export failed: {e}")
+        
+def insert_dashboard_data():
+    """
+    Insert dataset entries into the dashboard_data table.
+    If the dataset_id already exists, skip the insertion.
+    """
+    conn = None
+    try:
+        conn = connect()
+        cursor = conn.cursor()
+
+        for dataset_id, dataset_type in entries:
+            cursor.execute(
+                """
+                INSERT INTO dashboard_data (dataset_id, dataset_type)
+                VALUES (%s, %s)
+                ON CONFLICT (dataset_id) DO NOTHING;
+                """,
+                (dataset_id, dataset_type)
+            )
+
+        conn.commit()
+        print("✅ Data inserted into dashboard_data table successfully.")
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print(f"❌ Insert failed: {e}")
+
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
+
 
 
 if __name__ == "__main__":
-    print("Starting data insertion process...")
-    truncate_tables()
-    process_all_files()
-    export_to_csv()
+    # print("Starting data insertion process...")
+    # truncate_tables()
+    # process_all_files()
+    # export_to_csv()
+    insert_dashboard_data()
