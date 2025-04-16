@@ -68,7 +68,11 @@ def get_plot(metrics_plot_data: MetricsPlotData):
 def get_scatter_plot():
     """Endpoint to generate a scatter plot based on the provided data."""
     try:
-        return scatterplot_generator.generate_scatter_plot("data\\plot_metadata")
+        scatter_data =  scatterplot_generator.generate_scatter_plot("data\\plot_metadata")
+        fig_dict = json.loads(scatter_data)
+        fig = go.Figure(fig_dict)
+        html_plot = fig.to_html(full_html=False, include_plotlyjs="cdn")
+        return HTMLResponse(content=html_plot)
     except Exception as e:
         logger.error("Error in get_scatter_plot", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

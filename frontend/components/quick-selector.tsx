@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-// import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import Loader from "./ui/loader";
 
 export function QuickSelector() {
+  const router = useRouter();
   const [testData, setTestData] = useState({
     genomes: {
       DNA_Corpus: {
@@ -104,6 +105,7 @@ export function QuickSelector() {
           (typeof option === "string" ? option.replace("_", " ") : "") || "",
           type
         );
+        router.push("/" + option.toLowerCase().replace(/\s+/g, "_"));
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -187,8 +189,8 @@ export function QuickSelector() {
               ].map((option) => (
                 <button
                   key={option}
-                  // onClick={() => router.push(`/${option.toLowerCase().replace(/\s+/g, "_")}`)}
-                  onClick={() => handleBarClick(option, "barchart")}
+                  onClick={() => router.push(`/${option.toLowerCase().replace(/\s+/g, "_")}`)}
+                  // onClick={() => handleBarClick(option, "barchart")}
                   className={`px-4 py-1 rounded-full border text-sm ${
                     selectedChartOptions?.includes(option)
                       ? "bg-[#4A6EA9] text-white"
@@ -210,7 +212,7 @@ export function QuickSelector() {
               {["Compression Ratio -vs- Decompression Time"].map((option) => (
                 <button
                   key={option}
-                  onClick={() => handleBarClick(option, "scatterplot")}
+                  onClick={() => router.push("/" + option.toLowerCase().replace(/\s+/g, "_"))}
                   className={`px-4 py-1 rounded-full border text-sm ${
                     selectedPlotOptions.includes(option)
                       ? "bg-[#4A6EA9] text-white"

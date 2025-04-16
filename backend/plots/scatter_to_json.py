@@ -60,7 +60,7 @@ class ScatterPlotGenerator:
             os.makedirs(json_folder, exist_ok=True)
             json_path = os.path.join(json_folder, "compression_ratio_vs_decompression_time.json")
             fig.write_json(json_path)
-            fig.show()
+            # fig.show()
 
             return fig.to_json()
 
