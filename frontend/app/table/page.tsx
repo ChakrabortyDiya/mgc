@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import CustomTable from "../../components/CustomTable";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { useRouter } from "next/navigation";
-
+import { Button } from "@/components/ui/button";
 // Converted helper functions from exported functions to internal functions
 function parseColumns(records: Record<string, any>[]): string[] {
   if (!records || records.length === 0) return [];
@@ -50,11 +50,33 @@ const TablePage: React.FC = () => {
       setData(parsedData);
     }
   }, [comparisonRecords, router]);
-
+  const handleDownloadTable: () => void = () => {
+    const headers =
+      comparisonRecords.length > 0
+        ? Object.keys(comparisonRecords[0]).join(",")
+        : "";
+    const rows = comparisonRecords
+      .map((row) => Object.values(row).join(","))
+      .join("\n");
+    const csvContent = `data:text/csv;charset=utf-8,${headers}\n${rows}`;
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "comparison_records.csv");
+    document.body.appendChild(link); // Required for FF
+    link.click();
+  };
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">Dynamic Table</h1>
       <CustomTable columns={columns} data={data} />
+      <Button
+        variant="outline"
+        className="w-full sm:w-auto"
+        onClick={handleDownloadTable}
+      >
+        Download table
+      </Button>
     </div>
   );
 };
