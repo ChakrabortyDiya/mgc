@@ -58,7 +58,7 @@ export default function VisualizationPage() {
     const setter = type === "barchart" ? setSelectedChartOptions : setSelectedPlotOptions;
   
     try {
-      const response = await axios.post(`http://127.0.0.1:8000/dashboard/chart/${type}`, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_LINK}/dashboard/chart/${type}`, {
         name: option?.toLowerCase() || "",
       });
   

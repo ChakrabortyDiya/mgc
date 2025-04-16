@@ -62,7 +62,7 @@ export function QuickSelector() {
         type === "barchart" ? setSelectedChartOptions : setSelectedPlotOptions;
 
       const response = await axios.post(
-        `http://127.0.0.1:8000/dashboard/chart/${type}`,
+        `${process.env.NEXT_PUBLIC_SERVER_LINK}/dashboard/chart/${type}`,
         {
           name: option?.toLowerCase() || "",
         }

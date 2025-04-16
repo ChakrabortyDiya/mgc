@@ -38,7 +38,7 @@ export default function ComparisonPage() {
   const displayTable = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/dashboard/data",
+        process.env.NEXT_PUBLIC_SERVER_LINK+"/dashboard/data",
         {
           id: selectedGenomes.map((name) => name.split(" ")[0]),
           comp_type: [
