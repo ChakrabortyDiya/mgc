@@ -161,7 +161,7 @@ class PlotGenerator:
             json_path = os.path.join(
                 json_folder, f"{data_name.lower().replace(' ', '_')}.json")
             fig.write_json(json_path)
-            fig.show()
+            # fig.show()
 
             return fig.to_json()
 
