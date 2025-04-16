@@ -10,7 +10,7 @@ export default function Page() {
       <div className="min-h-screen bg-white">
         <Header />
         <main className="container mx-auto px-4 py-8">
-          <h1 className="text-4xl font-semibold text-[#4A6EA9] text-center mb-8">NGC: NIGGA Genome Compressors</h1>
+          <h1 className="text-4xl font-semibold text-[#4A6EA9] text-center mb-8">NGC: Normalized Genome Compressors</h1>
           <WelcomeBox />
           <QuickSelector />
           <div className="space-y-8">

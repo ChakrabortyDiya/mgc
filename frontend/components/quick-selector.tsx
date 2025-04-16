@@ -117,7 +117,7 @@ export function QuickSelector() {
   const handleBarClick = (option: string, type: "barchart" | "scatterplot") => {
     fetchData(option, type);
   };
-
+  console.log(handleBarClick);
   return (
     <div>
       {isLoading && (
