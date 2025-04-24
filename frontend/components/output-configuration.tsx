@@ -31,13 +31,13 @@ export function OutputConfiguration({selectedMetrics, setSelectedMetrics}: {sele
             <Label>Metrics:</Label>
             <div className="flex flex-col space-y-2">
               {[
-              "Compression Ratio",
-              "Compression Time",
-              "Compression Memory",
-              "Compression CPU Usage",
-              "Decompression Time",
-              "Decompression Memory",
-              "Decompression CPU Usage",
+              "Compression Size",
+              "Total Compression Time",
+              "Peak Compression Memory",
+              // "Compression CPU Usage",
+              "Total Decompression Time",
+              "Peak Decompression Memory",
+              // "Decompression CPU Usage",
               ].map((column) => (
               <label key={column} className="flex items-center space-x-2">
                 <input

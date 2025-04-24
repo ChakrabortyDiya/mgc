@@ -14,11 +14,7 @@ export function QuickSelector() {
         checked: false,
       },
       DNA: {
-        size: "DNA(FASTA)",
-        checked: false,
-      },
-      RNA: {
-        size: "RNA(FASTA)",
+        size: "Less repetitive benchmark genome sequences",
         checked: false,
       },
     },
@@ -35,24 +31,26 @@ export function QuickSelector() {
   // Toggle test data selection
   const handleTestDataChange = (
     category: keyof typeof testData,
-    option: string
+    selectedOption: string
   ) => {
     setTestData((prev) => {
-      const currentOption =
-        prev[category][option as keyof (typeof prev)[typeof category]];
+      const updatedOptions = Object.entries(prev[category]).reduce(
+        (acc, [option, value]) => {
+          acc[option as keyof typeof prev[typeof category]] = {
+            ...value,
+            checked: option === selectedOption, // Only the clicked one stays true
+          };
+          return acc;
+        },
+        {} as typeof prev[typeof category]
+      );
+  
       return {
         ...prev,
-        [category]: {
-          ...prev[category],
-          [option]: {
-            ...currentOption,
-            checked: !currentOption.checked,
-          },
-        },
+        [category]: updatedOptions,
       };
     });
   };
-
   // Handle option selection and API request
   const generateGraphData = async (
     option: string,
@@ -179,13 +177,13 @@ export function QuickSelector() {
             <span className="text-[#0066CC] font-medium w-24">Metrics</span>
             <div className="flex flex-wrap gap-2">
               {[
-                "Compression Ratio",
-                "Compression Time",
-                "Compression Memory",
-                "Compression CPU Usage",
-                "Decompression Time",
-                "Decompression Memory",
-                "Decompression CPU Usage",
+                "WACR",
+                "Total Compression Time",
+                "Peak Compression Memory",
+                "Peak Compression CPU Usage",
+                "Total Decompression Time",
+                "Peak Decompression Memory",
+                "Peak Decompression CPU Usage",
               ].map((option) => (
                 <button
                   key={option}
@@ -209,7 +207,7 @@ export function QuickSelector() {
               Scatterplot (Space-Time Tradeoff)
             </span>
             <div className="flex flex-wrap gap-2">
-              {["Compression Ratio -vs- Decompression Time"].map((option) => (
+              {["WACR -vs- Total Decompression Time"].map((option) => (
                 <button
                   key={option}
                   onClick={() => router.push("/" + option.toLowerCase().replace(/\s+/g, "_"))}
