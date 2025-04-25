@@ -204,8 +204,8 @@ def insert_dashboard_data():
 
 
 if __name__ == "__main__":
-    # print("Starting data insertion process...")
-    # truncate_tables()
-    # process_all_files()
-    # export_to_csv()
+    print("Starting data insertion process...")
+    truncate_tables()
+    process_all_files()
+    export_to_csv()
     insert_dashboard_data()
