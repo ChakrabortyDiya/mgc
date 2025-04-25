@@ -100,7 +100,7 @@ export function QuickSelector() {
       setIsLoading(true);
       if (option) {
         await generateGraphData(
-          (typeof option === "string" ? option.replace("_", " ") : "") || "",
+          (typeof option === "string" ? option : "") || "",
           type
         );
         router.push("/" + option.toLowerCase().replace(/\s+/g, "_"));
