@@ -23,7 +23,7 @@ export default function VisualizationPage() {
             )
           : await axios.post(
               `${process.env.NEXT_PUBLIC_SERVER_LINK}/dashboard/chart/barchart`,
-              { name: option?.toLowerCase().replace("_", " ") || "" }
+              { name: option?.toLowerCase() || "" }
             );
       if (response.status !== 200) throw new Error("Failed to fetch data");
       setSelectedChartOptions(response.data);
@@ -38,7 +38,7 @@ export default function VisualizationPage() {
         setIsLoading(true);
         if (option) {
           await generateGraphData(
-            typeof option === "string" ? option.replace("_", " ") : ""
+            typeof option === "string" ? option : ""
           );
         }
       } catch (error) {
