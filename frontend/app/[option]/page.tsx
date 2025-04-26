@@ -17,7 +17,7 @@ export default function VisualizationPage() {
       console.log("Generating graph data for option:", option);
       
       const response =
-        option === "compression ratio_-vs-_decompression_time"
+        option === "WACR_-vs-_total_decompression_time"
           ? await axios.post(
               `${process.env.NEXT_PUBLIC_SERVER_LINK}/dashboard/chart/scatterplot`
             )

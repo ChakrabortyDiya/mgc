@@ -38,7 +38,7 @@ export function QuickSelector() {
         (acc, [option, value]) => {
           acc[option as keyof typeof prev[typeof category]] = {
             ...value,
-            checked: option === selectedOption, // Only the clicked one stays true
+            checked: option === selectedOption, 
           };
           return acc;
         },
