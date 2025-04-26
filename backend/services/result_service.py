@@ -2,6 +2,20 @@ from sqlalchemy.orm import Session
 from database.models import ResultComparison
 from sqlalchemy import and_
 
+# Mapping for new metric names to DB columns
+METRIC_MAP = {
+    "wacr": "compression_ratio",
+    "total compression time": "compression_time",
+    "peak compression memory": "compression_memory",
+    "total compression memory": "compression_memory",
+    "peak compression cpu usage": "compression_cpu",
+    "total compression cpu usage": "compression_cpu",
+    "total decompression time": "decompression_time",
+    "peak decompression memory": "decompression_memory",
+    "total decompression memory": "decompression_memory",
+    "peak decompression cpu usage": "decompression_cpu",
+    "total decompression cpu usage": "decompression_cpu",
+}
 
 class DashboardService:
     @staticmethod
@@ -40,19 +54,32 @@ class DashboardService:
                 ResultComparison.compressor == comp_name,
                 ResultComparison.compressor_type == comp_type_str
             )
-        ).first()
+        ).all()
 
         if not query:
             return
 
+        # Aggregate logic for peak (max) and total (sum)
         result_dict = {
-            "dataset_id": query.dataset_id,
-            "compressor": query.compressor,
-            "compressor_type": query.compressor_type
+            "dataset_id": dataset_id,
+            "compressor": comp_name,
+            "compressor_type": comp_type_str
         }
 
         for metric in metrics:
-            metric_attr = metric.lower().replace(" ", "_")
-            result_dict[metric] = getattr(query, metric_attr, 0)
+            metric_key = metric.lower().strip()
+            db_col = METRIC_MAP.get(metric_key)
+            if not db_col:
+                result_dict[metric] = None
+                continue
+
+            if "peak" in metric_key:
+                value = max(getattr(row, db_col, 0) for row in query)
+            elif "total" in metric_key:
+                value = sum(getattr(row, db_col, 0) for row in query)
+            else:
+                # fallback: just take the first row's value
+                value = getattr(query[0], db_col, 0)
+            result_dict[metric] = value
 
         results.append(result_dict)
