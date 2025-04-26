@@ -99,10 +99,10 @@ export function QuickSelector() {
     try {
       setIsLoading(true);
       if (option) {
-        // await generateGraphData(
-        //   (typeof option === "string" ? option : "") || "",
-        //   type
-        // );
+        await generateGraphData(
+          (typeof option === "string" ? option : "") || "",
+          type
+        );
         router.push("/" + option.toLowerCase().replace(/\s+/g, "_"));
       }
     } catch (error) {
