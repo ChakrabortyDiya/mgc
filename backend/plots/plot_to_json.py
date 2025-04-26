@@ -113,8 +113,6 @@ class PlotGenerator:
                                 value = 4.24 if ctype == "proposed" else 4.3
                             else:
                                 value = 0
-                        else:
-                            value = 0
                     else:
                         if key == "wacr":
                             if comp == "cmix":
@@ -137,7 +135,6 @@ class PlotGenerator:
 
             fig = go.Figure()
             for idx, ctype in enumerate(types):
-                # Add a small offset to the text position for the second group to avoid overlap
                 if ctype == "proposed":
                     text_y = [y + (max(bar_data[ctype]) * 0.05 if max(bar_data[ctype]) else 1) for y in bar_data[ctype]]
                 else:
@@ -149,11 +146,28 @@ class PlotGenerator:
                     marker_color=bar_colors[ctype],
                     text=[f"{v:.2f}" for v in bar_data[ctype]],
                     textposition='outside',
+                    textangle=-90,  # <-- Make text vertical
                     cliponaxis=False,
                     textfont=dict(color='black'),
                     customdata=text_y,
                     texttemplate='%{text}',
                 ))
+
+            # Calculate min and max for y-axis scaling
+            all_values = [v for values in bar_data.values() for v in values if v is not None]
+            if all_values:
+                min_val = min(all_values)
+                max_val = max(all_values)
+                # Set y-axis start a bit below the minimum (e.g., 1 unit or 10% below, but not less than 0)
+                if min_val > 10:
+                    y_start = max(0, min_val - (max_val - min_val) * 0.1)
+                elif min_val > 1:
+                    y_start = max(0, min_val - 1)
+                else:
+                    y_start = 0
+                y_range = [y_start, max_val * 1.25]
+            else:
+                y_range = None
 
             fig.update_layout(
                 plot_bgcolor='white',
@@ -171,13 +185,21 @@ class PlotGenerator:
                     linecolor='black',
                     linewidth=1,
                     mirror=False,
+                    range=y_range  # <-- Set dynamic y-axis range here
                 ),
                 barmode='group',
                 bargap=0.6,
                 height=500,
                 title_x=0.5,
                 uniformtext_minsize=8,
-                uniformtext_mode='show'  # force all text to show
+                uniformtext_mode='show',  # force all text to show
+                legend=dict(
+                    orientation="h",      # horizontal
+                    yanchor="bottom",
+                    y=1.08,               # a bit above the plot
+                    xanchor="center",
+                    x=0.5
+                )
             )
 
             # Save and return as before
