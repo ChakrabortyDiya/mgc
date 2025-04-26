@@ -17,7 +17,7 @@ export default function VisualizationPage() {
       console.log("Generating graph data for option:", option);
       
       const response =
-        option === "wacr -vs-_total_decompression_time"
+        option === "wacr -vs- total decompression time"
           ? await axios.post(
               `${process.env.NEXT_PUBLIC_SERVER_LINK}/dashboard/chart/scatterplot`
             )
@@ -37,9 +37,9 @@ export default function VisualizationPage() {
       try {
         setIsLoading(true);
         if (option) {
-          await generateGraphData(
-            typeof option === "string" ? option : ""
-          );
+            await generateGraphData(
+            typeof option === "string" ? option.replace(/_/g, " ") : ""
+            );
         }
       } catch (error) {
         console.error("Error fetching data:", error);
