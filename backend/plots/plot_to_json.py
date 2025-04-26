@@ -25,6 +25,23 @@ METRIC_MAP = {
     "compressed size": ("compressed_size", "max"),
 }
 
+# Color map for each metric
+METRIC_COLOR_MAP = {
+    "wacr": "#3A59D1",  # blue
+    "total compression time": "#FCB454",  # orange
+    "peak compression memory": "#2ca02c",  # green
+    #"total compression memory": "#d62728",  # red
+    "peak compression cpu usage": "#205781",  # purple
+    #"total compression cpu usage": "#8c564b",  # brown
+    "total decompression time": "#FCB454",  # pink
+    "peak decompression memory": "#2ca02c",  # mauve
+    #"total decompression memory": "#bcbd22",  # olive
+    "peak decompression cpu usage": "#205781",  # cyan
+    #"total decompression cpu usage": "#aec7e8",  # light blue
+    #"original size": "#ffbb78",  # light orange
+    #"compressed size": "#98df8a",  # light green
+}
+
 class PlotGenerator:
     def __init__(self):
         if not DATABASE_URL:
@@ -58,8 +75,8 @@ class PlotGenerator:
             compressors = sorted(result_df['compressor'].unique())
             types = ['standard', 'proposed']
 
-            # Use only orange shades
-            base_orange = "#FFA500"
+            # Use color based on metric
+            base_color = METRIC_COLOR_MAP.get(key, "#85193C")
             def adjust_color(color, factor):
                 import colorsys
                 color = color.lstrip('#')
@@ -74,8 +91,8 @@ class PlotGenerator:
             x_labels = [comp.lower() for comp in compressors]
             bar_data = {ctype: [] for ctype in types}
             bar_colors = {
-                "standard": [adjust_color(base_orange, 1.2)] * len(compressors),
-                "proposed": [adjust_color(base_orange, 0.8)] * len(compressors)
+                "standard": [adjust_color(base_color, 1.2)] * len(compressors),
+                "proposed": [adjust_color(base_color, 0.8)] * len(compressors)
             }
 
             for comp in compressors:
@@ -119,21 +136,30 @@ class PlotGenerator:
                     bar_data[ctype].append(value)
 
             fig = go.Figure()
-            for ctype in types:
+            for idx, ctype in enumerate(types):
+                # Add a small offset to the text position for the second group to avoid overlap
+                if ctype == "proposed":
+                    text_y = [y + (max(bar_data[ctype]) * 0.05 if max(bar_data[ctype]) else 1) for y in bar_data[ctype]]
+                else:
+                    text_y = bar_data[ctype]
                 fig.add_trace(go.Bar(
                     x=x_labels,
                     y=bar_data[ctype],
                     name=ctype.capitalize(),
                     marker_color=bar_colors[ctype],
                     text=[f"{v:.2f}" for v in bar_data[ctype]],
-                    textposition='outside'
+                    textposition='outside',
+                    cliponaxis=False,
+                    textfont=dict(color='black'),
+                    customdata=text_y,
+                    texttemplate='%{text}',
                 ))
 
             fig.update_layout(
                 plot_bgcolor='white',
                 paper_bgcolor='white',
                 xaxis=dict(
-                    title="compressor",
+                    title="Compressors",
                     showline=True,
                     linecolor='black',
                     linewidth=1,
@@ -151,7 +177,7 @@ class PlotGenerator:
                 height=500,
                 title_x=0.5,
                 uniformtext_minsize=8,
-                uniformtext_mode='hide'
+                uniformtext_mode='show'  # force all text to show
             )
 
             # Save and return as before
