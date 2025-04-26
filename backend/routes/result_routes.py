@@ -54,6 +54,10 @@ def get_plot(metrics_plot_data: MetricsPlotData):
     """Endpoint to generate a plot based on the provided data name."""
     try:
         data_name = metrics_plot_data.name
+        if data_name == "compression_cpu":
+            data_name = "compression_cpu_usage"
+        elif data_name == "decompression_cpu":
+            data_name = "decompression_cpu_usage"
         json_data = plot_generator.generate_data_by_name(data_name)
         # Parse JSON string to dictionary and create figure
         fig_dict = json.loads(json_data)

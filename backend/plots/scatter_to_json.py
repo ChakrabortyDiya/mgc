@@ -11,17 +11,17 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Mapping for new metric names to DB columns and aggregation
 METRIC_MAP = {
-    "wacr": ("compression_ratio", "avg"),
-    "total decompression time": ("decompression_time", "sum"),
+    "wacr": ("compression_ratio", "max" or "avg"),  # as needed
     "total compression time": ("compression_time", "sum"),
     "peak compression memory": ("compression_memory", "max"),
     "total compression memory": ("compression_memory", "sum"),
-    "peak compression cpu usage": ("compression_cpu", "max"),
-    "total compression cpu usage": ("compression_cpu", "sum"),
+    "peak compression cpu usage": ("compression_cpu_usage", "max"),
+    "total compression cpu usage": ("compression_cpu_usage", "sum"),
+    "total decompression time": ("decompression_time", "sum"),
     "peak decompression memory": ("decompression_memory", "max"),
     "total decompression memory": ("decompression_memory", "sum"),
-    "peak decompression cpu usage": ("decompression_cpu", "max"),
-    "total decompression cpu usage": ("decompression_cpu", "sum"),
+    "peak decompression cpu usage": ("decompression_cpu_usage", "max"),
+    "total decompression cpu usage": ("decompression_cpu_usage", "sum"),
 }
 
 class ScatterPlotGenerator:
@@ -34,7 +34,7 @@ class ScatterPlotGenerator:
         try:
             # Fetch all relevant columns
             result_df = pd.read_sql(
-                "SELECT dataset_id, compressor, compressor_type, compression_ratio, decompression_time, compression_time, compression_memory, decompression_memory FROM result_comparison",
+                "SELECT dataset_id, compressor, compressor_type, compression_ratio, decompression_time, compression_time, compression_memory, compression_cpu_usage, decompression_memory, decompression_cpu_usage FROM result_comparison",
                 self.engine
             )
 
