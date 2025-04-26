@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.colors
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
@@ -65,11 +64,8 @@ class PlotGenerator:
             compressors = sorted(merged_df['compressor'].unique())
             types = ['standard', 'proposed']
 
-            # Assign a base color for each compressor
-            base_colors = plotly.colors.qualitative.Plotly
-            color_map = {comp: base_colors[i % len(base_colors)] for i, comp in enumerate(compressors)}
-
-            # Helper to lighten/darken color
+            # Use only orange shades
+            base_orange = "#85193C"  
             def adjust_color(color, factor):
                 import colorsys
                 color = color.lstrip('#')
@@ -81,12 +77,14 @@ class PlotGenerator:
                 return f'#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}'
 
             # Prepare data for grouped bars
-            x_labels = [comp.capitalize() for comp in compressors]
+            x_labels = [comp.lower() for comp in compressors]  # Changed to lowercase
             bar_data = {ctype: [] for ctype in types}
-            bar_colors = {ctype: [] for ctype in types}
+            bar_colors = {
+                "standard": [adjust_color(base_orange, 1.2)] * len(compressors),
+                "proposed": [adjust_color(base_orange, 0.8)] * len(compressors)
+            }
 
             for comp in compressors:
-                base_color = color_map[comp]
                 for ctype in types:
                     filtered = merged_df[
                         (merged_df['compressor'] == comp) &
@@ -102,9 +100,6 @@ class PlotGenerator:
                         else:
                             value = 0
                     bar_data[ctype].append(value)
-                    # Lighter for standard, darker for proposed
-                    factor = 1.2 if ctype == "standard" else 0.8
-                    bar_colors[ctype].append(adjust_color(base_color, factor))
 
             fig = go.Figure()
             for ctype in types:
@@ -112,17 +107,34 @@ class PlotGenerator:
                     x=x_labels,
                     y=bar_data[ctype],
                     name=ctype.capitalize(),
-                    marker_color=bar_colors[ctype]
+                    marker_color=bar_colors[ctype],
+                    text=[f"{v:.2f}" for v in bar_data[ctype]],
+                    textposition='outside'
                 ))
 
             fig.update_layout(
-                title=f"{data_name.title()} by Compressor and Type",
-                xaxis=dict(title="Compressor"),
-                yaxis=dict(title=data_name.title()),
+                plot_bgcolor='white',
+                paper_bgcolor='white',
+                xaxis=dict(
+                    title="compressor",  # Changed to lowercase
+                    showline=True,
+                    linecolor='black',
+                    linewidth=1,
+                    mirror=False,
+                ),
+                yaxis=dict(
+                    title=data_name.lower(),  # Changed to lowercase
+                    showline=True,
+                    linecolor='black',
+                    linewidth=1,
+                    mirror=False,
+                ),
                 barmode='group',
-                bargap=0.3,
+                bargap=0.6,
                 height=500,
                 title_x=0.5,
+                uniformtext_minsize=8,
+                uniformtext_mode='hide'
             )
 
             # Save and return as before
@@ -139,7 +151,6 @@ class PlotGenerator:
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
         json_dir = os.path.join(base_dir, 'data', 'plot_metadata')
         return self.generate_plot_from_db(json_dir, data_name)
-
 
 # if __name__ == "__main__":
 #     plot_gen = PlotGenerator()
