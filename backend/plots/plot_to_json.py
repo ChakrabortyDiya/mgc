@@ -28,19 +28,13 @@ METRIC_MAP = {
 
 # Color map for each metric
 METRIC_COLOR_MAP = {
-    "wacr": "#3A59D1",  # blue
+    "wacr": "#2dd3e4",  # cyan
     "total compression time": "#FCB454",  # orange
-    "peak compression memory": "#2ca02c",  # green
-    #"total compression memory": "#d62728",  # red
-    "peak compression cpu usage": "#205781",  # purple
-    #"total compression cpu usage": "#8c564b",  # brown
-    # sap green, darker shade
-    "peak decompression memory": "#406422",  # sap green
-    #"total decompression memory": "#bcbd22",  # olive
-    "peak decompression cpu usage": "#205781",  # cyan
-    #"total decompression cpu usage": "#aec7e8",  # light blue
-    #"original size": "#ffbb78",  # light orange
-    #"compressed size": "#98df8a",  # light green
+    "peak compression memory": "#e96ca3",  # pink
+    "peak compression cpu usage": "#205781",  # dark blue
+    "total decompression time": "#FCB454",  # light orange
+    "peak decompression memory": "#e96ca3",  # pink
+    "peak decompression cpu usage": "#205781",  # dark blue
 }
 
 class PlotGenerator:
@@ -73,10 +67,15 @@ class PlotGenerator:
                 raise ValueError(f"Unsupported data name: {data_name}")
 
             value_col, agg_type = METRIC_MAP[key]
-            compressors = sorted(result_df['compressor'].unique())
             types = ['standard', 'proposed']
 
-            # Use color based on metric
+            # Define desired compressor order
+            desired_order = ['7-zip', 'paq8px', 'bsc', 'gzip', 'zstd', 'bzip2', 'zpaq', 'cmix']
+            compressors = [c.lower() for c in desired_order if c.lower() in result_df['compressor'].unique()]
+            print(f"Compressors found: {compressors}")
+            x_labels = compressors
+
+            # Color adjustments
             base_color = METRIC_COLOR_MAP.get(key, "#85193C")
             def adjust_color(color, factor):
                 import colorsys
@@ -88,8 +87,6 @@ class PlotGenerator:
                 r, g, b = colorsys.hls_to_rgb(h, l, s)
                 return f'#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}'
 
-            # Prepare data for grouped bars
-            x_labels = [comp.lower() for comp in compressors]
             bar_data = {ctype: [] for ctype in types}
             bar_colors = {
                 "standard": [adjust_color(base_color, 1.2)] * len(compressors),
@@ -104,7 +101,7 @@ class PlotGenerator:
                         (result_df['dataset_id'].str.lower() == "total")
                     ]
                     if filtered.empty:
-                        # Special hardcoded WACR for cmix, gzip, paq8px
+                        # Special WACR handling
                         if key == "wacr":
                             if comp == "cmix":
                                 value = 4.25 if ctype == "proposed" else 4.28
@@ -135,7 +132,6 @@ class PlotGenerator:
                         else:
                             value = 0
 
-                    # Convert memory columns from KB to MB
                     if "memory" in value_col:
                         value = value / 1024 if value else 0
 
@@ -154,19 +150,17 @@ class PlotGenerator:
                     marker_color=bar_colors[ctype],
                     text=[f"{v:.2f}" for v in bar_data[ctype]],
                     textposition='outside',
-                    textangle=-90,  # <-- Make text vertical
+                    textangle=-90,
                     cliponaxis=False,
                     textfont=dict(color='black'),
                     customdata=text_y,
                     texttemplate='%{text}',
                 ))
 
-            # Calculate min and max for y-axis scaling
             all_values = [v for values in bar_data.values() for v in values if v is not None]
             if all_values:
                 min_val = min(all_values)
                 max_val = max(all_values)
-                # Set y-axis start a bit below the minimum (e.g., 10% below, but not less than 0)
                 if min_val > 0:
                     y_start = math.floor(min_val) * 0.5
                     y_start = max(0, y_start)
@@ -176,12 +170,14 @@ class PlotGenerator:
             else:
                 y_range = None
 
-            # Set y-axis label with units, using camelCase for the metric name
             def to_camel_case(s):
+                if s == "wacr":
+                    return "WACR"
                 parts = s.split()
                 return ' ' + parts[0].capitalize() + ' ' + ' '.join(word.capitalize() for word in parts[1:])
 
             camel_label = to_camel_case(data_name)
+            
             y_axis_label = camel_label
             if "time" in value_col:
                 y_axis_label += " (s)"
@@ -202,6 +198,9 @@ class PlotGenerator:
                     linecolor='black',
                     linewidth=1,
                     mirror=False,
+                    tickmode='array',
+                    tickvals=x_labels,
+                    ticktext=[label for label in x_labels],
                 ),
                 yaxis=dict(
                     title=y_axis_label,
@@ -209,24 +208,23 @@ class PlotGenerator:
                     linecolor='black',
                     linewidth=1,
                     mirror=False,
-                    range=y_range  # <-- Set dynamic y-axis range here
+                    range=y_range
                 ),
                 barmode='group',
                 bargap=0.6,
                 height=500,
                 title_x=0.5,
                 uniformtext_minsize=8,
-                uniformtext_mode='show',  # force all text to show
+                uniformtext_mode='show',
                 legend=dict(
-                    orientation="h",      # horizontal
+                    orientation="h",
                     yanchor="bottom",
-                    y=1.08,               # a bit above the plot
+                    y=1.08,
                     xanchor="center",
                     x=0.5
                 )
             )
 
-            # Save and return as before
             os.makedirs(json_folder, exist_ok=True)
             json_path = os.path.join(json_folder, f"{key.replace(' ', '_')}.json")
             fig.write_json(json_path)
@@ -240,7 +238,3 @@ class PlotGenerator:
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
         json_dir = os.path.join(base_dir, 'data', 'plot_metadata')
         return self.generate_plot_from_db(json_dir, data_name)
-
-# if __name__ == "__main__":
-#     plot_gen = PlotGenerator()
-#     plot_gen.generate_data_by_name("compression time")
