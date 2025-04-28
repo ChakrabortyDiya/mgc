@@ -1,3 +1,4 @@
+import math
 import os
 import pandas as pd
 import plotly.graph_objects as go
@@ -33,8 +34,8 @@ METRIC_COLOR_MAP = {
     #"total compression memory": "#d62728",  # red
     "peak compression cpu usage": "#205781",  # purple
     #"total compression cpu usage": "#8c564b",  # brown
-    "total decompression time": "#FCB454",  # pink
-    "peak decompression memory": "#2ca02c",  # mauve
+    # sap green, darker shade
+    "peak decompression memory": "#406422",  # sap green
     #"total decompression memory": "#bcbd22",  # olive
     "peak decompression cpu usage": "#205781",  # cyan
     #"total decompression cpu usage": "#aec7e8",  # light blue
@@ -113,6 +114,8 @@ class PlotGenerator:
                                 value = 4.24 if ctype == "proposed" else 4.3
                             else:
                                 value = 0
+                        else:
+                            value = 0
                     else:
                         if key == "wacr":
                             if comp == "cmix":
@@ -131,6 +134,11 @@ class PlotGenerator:
                             value = filtered[value_col].sum()
                         else:
                             value = 0
+
+                    # Convert memory columns from KB to MB
+                    if "memory" in value_col:
+                        value = value / 1024 if value else 0
+
                     bar_data[ctype].append(value)
 
             fig = go.Figure()
@@ -158,16 +166,32 @@ class PlotGenerator:
             if all_values:
                 min_val = min(all_values)
                 max_val = max(all_values)
-                # Set y-axis start a bit below the minimum (e.g., 1 unit or 10% below, but not less than 0)
-                if min_val > 10:
-                    y_start = max(0, min_val - (max_val - min_val) * 0.1)
-                elif min_val > 1:
-                    y_start = max(0, min_val - 1)
+                # Set y-axis start a bit below the minimum (e.g., 10% below, but not less than 0)
+                if min_val > 0:
+                    y_start = math.floor(min_val) * 0.5
+                    y_start = max(0, y_start)
                 else:
                     y_start = 0
                 y_range = [y_start, max_val * 1.25]
             else:
                 y_range = None
+
+            # Set y-axis label with units, using camelCase for the metric name
+            def to_camel_case(s):
+                parts = s.split()
+                return ' ' + parts[0].capitalize() + ' ' + ' '.join(word.capitalize() for word in parts[1:])
+
+            camel_label = to_camel_case(data_name)
+            y_axis_label = camel_label
+            if "time" in value_col:
+                y_axis_label += " (s)"
+            elif "memory" in value_col:
+                y_axis_label += " (MB)"
+            elif "cpu_usage" in value_col or "cpu usage" in y_axis_label:
+                if "compression" in value_col:
+                    y_axis_label = "Total Compression CPU (%)"
+                else:
+                    y_axis_label = "Total Decompression CPU (%)"
 
             fig.update_layout(
                 plot_bgcolor='white',
@@ -180,7 +204,7 @@ class PlotGenerator:
                     mirror=False,
                 ),
                 yaxis=dict(
-                    title=data_name.lower(),
+                    title=y_axis_label,
                     showline=True,
                     linecolor='black',
                     linewidth=1,
