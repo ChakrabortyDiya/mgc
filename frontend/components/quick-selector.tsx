@@ -180,10 +180,10 @@ export function QuickSelector() {
                 "WACR",
                 "Total Compression Time",
                 "Peak Compression Memory",
-                "Peak Compression CPU Usage",
+                "Compression CPU",
                 "Total Decompression Time",
                 "Peak Decompression Memory",
-                "Peak Decompression CPU Usage",
+                "Decompression CPU",
               ].map((option) => (
                 <button
                   key={option}
