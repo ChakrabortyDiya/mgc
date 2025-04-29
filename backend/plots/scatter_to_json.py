@@ -175,9 +175,22 @@ class ScatterPlotGenerator:
                     ))
 
             fig.update_layout(
-                title=f"Scatter Plot: {x_metric} vs {y_metric}",
-                xaxis=dict(title=x_metric),
-                yaxis=dict(title=y_metric),
+                plot_bgcolor='white',
+                paper_bgcolor='white',
+                xaxis=dict(
+                    title=x_metric,
+                    showline=True,        # Show x-axis line
+                    linecolor='black',
+                    linewidth=1,
+                    mirror=False
+                ),
+                yaxis=dict(
+                    title=f"{y_metric} (s)",   # <-- Add unit in bracket
+                    showline=True,        # Show y-axis line
+                    linecolor='black',
+                    linewidth=1,
+                    mirror=False
+                ),
                 height=600,
                 title_x=0.5
             )

@@ -9,9 +9,9 @@ from dotenv import load_dotenv
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Updated mapping: new names to (column, aggregation)
+# Mapping from user-facing names to database fields and aggregations
 METRIC_MAP = {
-    "wacr": ("compression_ratio", "max" or "avg"),  # as needed
+    "wacr": ("compression_ratio", "max" or "avg"),
     "total compression time": ("compression_time", "sum"),
     "peak compression memory": ("compression_memory", "max"),
     "total compression memory": ("compression_memory", "sum"),
@@ -26,15 +26,15 @@ METRIC_MAP = {
     "compressed size": ("compressed_size", "max"),
 }
 
-# Color map for each metric
+# Metric-specific colors
 METRIC_COLOR_MAP = {
-    "wacr": "#2dd3e4",  # cyan
-    "total compression time": "#FCB454",  # orange
-    "peak compression memory": "#e96ca3",  # pink
-    "peak compression cpu usage": "#205781",  # dark blue
-    "total decompression time": "#FCB454",  # light orange
-    "peak decompression memory": "#e96ca3",  # pink
-    "peak decompression cpu usage": "#205781",  # dark blue
+    "wacr": "#2dd3e4",
+    "total compression time": "#FCB454",
+    "peak compression memory": "#e96ca3",
+    "peak compression cpu usage": "#205781",
+    "total decompression time": "#FCB454",
+    "peak decompression memory": "#e96ca3",
+    "peak decompression cpu usage": "#205781",
 }
 
 class PlotGenerator:
@@ -53,11 +53,9 @@ class PlotGenerator:
             if result_df.empty:
                 raise ValueError("No data in result_comparison")
 
-            # Normalize
             result_df['compressor_type'] = result_df['compressor_type'].str.strip().str.lower()
             result_df['compressor'] = result_df['compressor'].str.strip().str.lower()
 
-            # Normalize input
             key = data_name.lower().strip()
             if key == "compression cpu":
                 key = "compression cpu usage"
@@ -69,13 +67,11 @@ class PlotGenerator:
             value_col, agg_type = METRIC_MAP[key]
             types = ['standard', 'proposed']
 
-            # Define desired compressor order
             desired_order = ['7-zip', 'paq8px', 'bsc', 'gzip', 'zstd', 'bzip2', 'zpaq', 'cmix']
             compressors = [c.lower() for c in desired_order if c.lower() in result_df['compressor'].unique()]
-            print(f"Compressors found: {compressors}")
-            x_labels = compressors
+            
+            x_labels = [c for c in compressors]
 
-            # Color adjustments
             base_color = METRIC_COLOR_MAP.get(key, "#85193C")
             def adjust_color(color, factor):
                 import colorsys
@@ -101,7 +97,6 @@ class PlotGenerator:
                         (result_df['dataset_id'].str.lower() == "total")
                     ]
                     if filtered.empty:
-                        # Special WACR handling
                         if key == "wacr":
                             if comp == "cmix":
                                 value = 4.25 if ctype == "proposed" else 4.28
@@ -157,37 +152,35 @@ class PlotGenerator:
                     texttemplate='%{text}',
                 ))
 
+            # Final smart-rounded y-axis range
             all_values = [v for values in bar_data.values() for v in values if v is not None]
-            if all_values:
-                min_val = min(all_values)
+            if key == "wacr":
+                y_range = [3, 5]  # Set WACR y-axis range from 3 to 5
+            elif all_values:
                 max_val = max(all_values)
-                if min_val > 0:
-                    y_start = math.floor(min_val) * 0.5
-                    y_start = max(0, y_start)
-                else:
-                    y_start = 0
-                y_range = [y_start, max_val * 1.25]
+                base = 10 ** int(math.floor(math.log10(max_val)))
+                rounded_max = math.ceil(max_val / base * 2) / 2 * base
+                y_range = [0, rounded_max]
             else:
                 y_range = None
 
             def to_camel_case(s):
-                if s == "wacr":
-                    return "WACR"
+                if s == 'wacr':
+                    return 'WACR'
                 parts = s.split()
                 return ' ' + parts[0].capitalize() + ' ' + ' '.join(word.capitalize() for word in parts[1:])
 
             camel_label = to_camel_case(data_name)
-            
             y_axis_label = camel_label
             if "time" in value_col:
                 y_axis_label += " (s)"
             elif "memory" in value_col:
                 y_axis_label += " (MB)"
             elif "cpu_usage" in value_col or "cpu usage" in y_axis_label:
-                if "compression" in value_col:
-                    y_axis_label = "Total Compression CPU (%)"
+                if "decompression" in value_col:
+                    y_axis_label = "Decompression CPU (%)"
                 else:
-                    y_axis_label = "Total Decompression CPU (%)"
+                    y_axis_label = "Compression CPU (%)"
 
             fig.update_layout(
                 plot_bgcolor='white',
@@ -200,7 +193,7 @@ class PlotGenerator:
                     mirror=False,
                     tickmode='array',
                     tickvals=x_labels,
-                    ticktext=[label for label in x_labels],
+                    ticktext=x_labels,
                 ),
                 yaxis=dict(
                     title=y_axis_label,
@@ -216,13 +209,7 @@ class PlotGenerator:
                 title_x=0.5,
                 uniformtext_minsize=8,
                 uniformtext_mode='show',
-                legend=dict(
-                    orientation="h",
-                    yanchor="bottom",
-                    y=1.08,
-                    xanchor="center",
-                    x=0.5
-                )
+                showlegend=False  # <-- Remove the legend from the graph
             )
 
             os.makedirs(json_folder, exist_ok=True)
