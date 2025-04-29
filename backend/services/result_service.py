@@ -5,6 +5,7 @@ from sqlalchemy import and_
 # Mapping for new metric names to DB columns
 METRIC_MAP = {
     "wacr": "compression_ratio",
+    "compression size": "compressed_size",
     "total compression time": "compression_time",
     "peak compression memory": "compression_memory",
     "total compression memory": "compression_memory",
