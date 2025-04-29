@@ -1,6 +1,10 @@
+import logging
 from sqlalchemy.orm import Session
 from database.models import ResultComparison
 from sqlalchemy import and_
+
+# Configure logging if not already configured
+logging.basicConfig(level=logging.INFO)
 
 # Mapping for new metric names to DB columns
 METRIC_MAP = {
@@ -23,10 +27,14 @@ class DashboardService:
     def fetch_grouped_results(db: Session, input_data):
         results = []
 
-        # Map comp_type list index to type string
-        comp_type_map = {0: "standard", 1: "proposed"}
-        selected_types = [comp_type_map[i]
-                          for i, flag in enumerate(input_data.comp_type) if flag == 1]
+        try:
+            # Map comp_type list index to type string
+            comp_type_map = {0: "standard", 1: "proposed"}
+            selected_types = [comp_type_map[i]
+                              for i, flag in enumerate(input_data.comp_type) if flag == 1]
+        except Exception as e:
+            logging.error("Error processing comp_type mapping: %s", e, exc_info=True)
+            return results  # Return empty results or re-raise exception if needed
 
         for dataset_id in input_data.id:
             # Handle standard compressors
@@ -49,18 +57,24 @@ class DashboardService:
 
     @staticmethod
     def _process_query(db, dataset_id, comp_name, comp_type_str, metrics, results):
-        query = db.query(ResultComparison).filter(
-            and_(
-                ResultComparison.dataset_id == dataset_id,
-                ResultComparison.compressor == comp_name,
-                ResultComparison.compressor_type == comp_type_str
-            )
-        ).all()
-
-        if not query:
+        try:
+            query = db.query(ResultComparison).filter(
+                and_(
+                    ResultComparison.dataset_id == dataset_id,
+                    ResultComparison.compressor == comp_name,
+                    ResultComparison.compressor_type == comp_type_str
+                )
+            ).all()
+        except Exception as e:
+            logging.error("Database query failed for dataset_id %s, compressor %s, type %s: %s",
+                          dataset_id, comp_name, comp_type_str, e, exc_info=True)
             return
 
-        # Aggregate logic for peak (max) and total (sum)
+        if not query:
+            logging.info("No results found for dataset_id %s, compressor %s, type %s",
+                         dataset_id, comp_name, comp_type_str)
+            return
+
         result_dict = {
             "dataset_id": dataset_id,
             "compressor": comp_name,
@@ -68,19 +82,24 @@ class DashboardService:
         }
 
         for metric in metrics:
-            metric_key = metric.lower().strip()
-            db_col = METRIC_MAP.get(metric_key)
-            if not db_col:
-                result_dict[metric] = None
-                continue
+            try:
+                metric_key = metric.lower().strip()
+                db_col = METRIC_MAP.get(metric_key)
+                if not db_col:
+                    result_dict[metric] = None
+                    continue
 
-            if "peak" in metric_key:
-                value = max(getattr(row, db_col, 0) for row in query)
-            elif "total" in metric_key:
-                value = sum(getattr(row, db_col, 0) for row in query)
-            else:
-                # fallback: just take the first row's value
-                value = getattr(query[0], db_col, 0)
-            result_dict[metric] = value
+                if "peak" in metric_key:
+                    value = max(getattr(row, db_col, 0) for row in query)
+                elif "total" in metric_key:
+                    value = sum(getattr(row, db_col, 0) for row in query)
+                else:
+                    # fallback: take the first row's value
+                    value = getattr(query[0], db_col, 0)
+                result_dict[metric] = value
+            except Exception as e:
+                logging.error("Error processing metric '%s' for dataset_id %s, compressor %s: %s",
+                              metric, dataset_id, comp_name, e, exc_info=True)
+                result_dict[metric] = None
 
         results.append(result_dict)
