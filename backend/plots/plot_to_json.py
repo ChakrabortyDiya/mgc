@@ -17,6 +17,8 @@ METRIC_MAP = {
     "total compression memory": ("compression_memory", "sum"),
     "peak compression cpu usage": ("compression_cpu_usage", "max"),
     "total compression cpu usage": ("compression_cpu_usage", "sum"),
+    "compression cpu usage" : ("compression_cpu_usage", "max"),
+    "decompression cpu usage": ("decompression_cpu_usage", "max"),
     "total decompression time": ("decompression_time", "sum"),
     "peak decompression memory": ("decompression_memory", "max"),
     "total decompression memory": ("decompression_memory", "sum"),
