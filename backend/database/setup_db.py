@@ -33,6 +33,9 @@ def reset_database():
                 decompression_time DOUBLE PRECISION DEFAULT 0,
                 decompression_cpu_usage DOUBLE PRECISION DEFAULT 0,
 
+                original_size DOUBLE PRECISION DEFAULT 0,
+                compressed_size DOUBLE PRECISION DEFAULT 0,
+
                 PRIMARY KEY (dataset_id, compressor, compressor_type)
             );
         """)
@@ -46,6 +49,27 @@ def reset_database():
 
         conn.commit()
         print("Tables recreated successfully!")
+
+        # Show tables and columns
+        print("\nTables and columns in the current database:")
+        cur.execute("""
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            ORDER BY table_name;
+        """)
+        tables = cur.fetchall()
+        for (table_name,) in tables:
+            print(f"\nTable: {table_name}")
+            cur.execute(f"""
+                SELECT column_name, data_type
+                FROM information_schema.columns
+                WHERE table_name = %s
+                ORDER BY ordinal_position;
+            """, (table_name,))
+            columns = cur.fetchall()
+            for col_name, data_type in columns:
+                print(f"  - {col_name} ({data_type})")
 
     except Exception as e:
         print(f"Error setting up database: {e}")

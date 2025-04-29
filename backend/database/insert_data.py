@@ -10,7 +10,7 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 DATA_FOLDER = "data/Result_data"
 
-EXPECTED_COMPRESSORS = {"7-zip", "paq8",
+EXPECTED_COMPRESSORS = {"7-zip", "paq8", "bsc",
                         "gzip", "zstd", "bzip2", "zpaq", "cmix"}
 
 COLUMN_MAP = {
@@ -29,6 +29,8 @@ entries = [
 ]
 
 skipped_files = []
+not_found_compressors = set()
+inserted_compressors = set()
 
 
 def connect():
@@ -75,9 +77,13 @@ def insert_row(cursor, data):
 
 def normalize_compressor(name):
     name = name.lower().replace("s-", "").replace("p-", "")
+    # Change paq8 to paq8px before matching
+    if name.startswith("paq8"):
+        return "paq8px"
     for expected in EXPECTED_COMPRESSORS:
         if expected.replace("-", "") in name.replace("-", ""):
             return expected
+    not_found_compressors.add(name)
     return None
 
 
@@ -102,38 +108,68 @@ def process_file(file_path, conn):
             if pd.isna(dataset_id):
                 continue
 
-            for col in df.columns:
-                if col == 'ID' or pd.isna(row.get(col)):
-                    continue
+            # Special handling for C_Size.csv
+            if suffix == "size":
+                original = clean_float(row.get("O.Size"))
+                for col in df.columns:
+                    if col == 'ID' or col == 'O.Size' or pd.isna(row.get(col)):
+                        continue
 
-                ctype = 'proposed' if col.startswith('P') else 'standard'
-                raw_name = col[2:]  # remove P- or S-
-                compressor = normalize_compressor(raw_name)
+                    ctype = 'proposed' if col.startswith('P') else 'standard'
+                    raw_name = col[2:]  # remove P- or S-
+                    compressor = normalize_compressor(raw_name)
 
-                if not compressor:
-                    continue  # skip unknown compressor
+                    if not compressor:
+                        continue  # skip unknown compressor
 
-                data = {
-                    "dataset_id": dataset_id,
-                    "compressor": compressor,
-                    "compressor_type": ctype,
-                    "dataset_type": "dna"
-                }
+                    inserted_compressors.add(compressor)
 
-                if col_suffix == "ratio":
-                    original = clean_float(row.get("O.Size"))
-                    compressed = clean_float(row.get(col))
-                    data["compression_ratio"] = round(
-                        original / compressed, 4) if compressed else 0
-                else:
+                    data = {
+                        "dataset_id": dataset_id,
+                        "compressor": compressor,
+                        "compressor_type": ctype,
+                        "dataset_type": "dna",
+                        "original_size": original,
+                        "compressed_size": clean_float(row.get(col)),
+                        # All other columns default to 0 or left blank
+                    }
+
+                    try:
+                        insert_row(cursor, data)
+                    except Exception as err:
+                        conn.rollback()
+                        print(f"Error in {filename} | {dataset_id} | {compressor} → {err}")
+                        continue
+
+            else:
+                for col in df.columns:
+                    if col == 'ID' or pd.isna(row.get(col)):
+                        continue
+
+                    ctype = 'proposed' if col.startswith('P') else 'standard'
+                    raw_name = col[2:]  # remove P- or S-
+                    compressor = normalize_compressor(raw_name)
+
+                    if not compressor:
+                        continue  # skip unknown compressor
+
+                    inserted_compressors.add(compressor)
+
+                    data = {
+                        "dataset_id": dataset_id,
+                        "compressor": compressor,
+                        "compressor_type": ctype,
+                        "dataset_type": "dna"
+                    }
+
                     data[col_prefix] = clean_float(row.get(col))
 
-                try:
-                    insert_row(cursor, data)
-                except Exception as err:
-                    conn.rollback()
-                    print(f"Error in {filename} | {dataset_id} | {compressor} → {err}")
-                    continue
+                    try:
+                        insert_row(cursor, data)
+                    except Exception as err:
+                        conn.rollback()
+                        print(f"Error in {filename} | {dataset_id} | {compressor} → {err}")
+                        continue
 
         conn.commit()
         cursor.close()
@@ -157,6 +193,20 @@ def process_all_files():
             print(f" - {name}: {reason}")
     else:
         print("\nAll files processed.")
+
+    # Log compressors not found
+    if not_found_compressors:
+        print("\nCompressors not found and skipped:")
+        for comp in sorted(not_found_compressors):
+            print(f" - {comp}")
+    else:
+        print("\nAll compressors found and processed.")
+
+    # Log compressors that were inserted
+    if inserted_compressors:
+        print("\nCompressors inserted:")
+        for comp in sorted(inserted_compressors):
+            print(f" - {comp}")
 
 
 def export_to_csv():
