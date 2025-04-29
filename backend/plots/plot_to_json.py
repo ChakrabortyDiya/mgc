@@ -33,10 +33,10 @@ METRIC_COLOR_MAP = {
     "wacr": "#2dd3e4",
     "total compression time": "#FCB454",
     "peak compression memory": "#e96ca3",
-    "peak compression cpu usage": "#205781",
+    "compression cpu usage": "#205781",
     "total decompression time": "#FCB454",
     "peak decompression memory": "#e96ca3",
-    "peak decompression cpu usage": "#205781",
+    "decompression cpu usage": "#205781",
 }
 
 class PlotGenerator:
