@@ -13,8 +13,8 @@ if not MONGODB_URI:
 
 # Connect to MongoDB and choose the desired database and collection.
 client = MongoClient(MONGODB_URI)
-# db = client["rlr_small_genomes_raw"]  # Use your normalized DB name here
-db = client["rlr_dna_raw"]  # Use your normalized DB name here
+db = client["rlr_small_genomes_raw"]  # Use your normalized DB name here
+#db = client["rlr_dna_raw"]  # Use your normalized DB name here
 collection = db["results"]
 
 class ScatterPlotGenerator:
@@ -135,7 +135,7 @@ class ScatterPlotGenerator:
                     mirror=False
                 ),
                 yaxis=dict(
-                    title=f"{y_metric} (s)",
+                    title=f"TDT (s)",
                     showline=True,
                     linecolor='black',
                     linewidth=1,

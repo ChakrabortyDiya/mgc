@@ -192,21 +192,27 @@ class PlotGenerator:
 
             camel_label = to_camel_case(data_name)
             y_axis_label = camel_label
-            if "time" in value_col:
-                y_axis_label += " (s)"
-            elif "memory" in value_col:
-                y_axis_label += " (MB)"
+            if "time" in value_col or "time" in y_axis_label:
+                if "decompression" in value_col:
+                    y_axis_label = "TDT (s)"
+                else:
+                    y_axis_label = "TCT (s)"
+            elif "memory" in value_col or "memory" in y_axis_label:
+                if "decompression" in value_col:
+                    y_axis_label = "PDM (MB)"
+                else:
+                    y_axis_label = "PCM (MB)"
             elif "cpu_usage" in value_col or "cpu usage" in y_axis_label:
                 if "decompression" in value_col:
-                    y_axis_label = "Decompression CPU (%)"
+                    y_axis_label = "PDC (%)"
                 else:
-                    y_axis_label = "Compression CPU (%)"
+                    y_axis_label = "PCC (%)"
 
             fig.update_layout(
                 plot_bgcolor='white',
                 paper_bgcolor='white',
                 xaxis=dict(
-                    title="Compressors",
+                    title="Encoders",
                     showline=True,
                     linecolor='black',
                     linewidth=1,
