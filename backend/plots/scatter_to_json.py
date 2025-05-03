@@ -3,16 +3,24 @@ import math
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.colors
-from sqlalchemy import create_engine
+from pymongo import MongoClient
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
+MONGODB_URI = os.getenv("MONGODB_URI")
+if not MONGODB_URI:
+    raise ValueError("MONGODB_URI is not set in environment variables.")
 
-# Mapping for new metric names to DB columns and aggregation
+# Connect to MongoDB and choose the desired database and collection.
+client = MongoClient(MONGODB_URI)
+# Using normalized, abbreviated database name as set in insert_data.py (for example)
+db = client["rlr_small_genomes_raw"]
+collection = db["results"]
+
+# Mapping for new metric names to DB fields and aggregation methods.
 METRIC_MAP = {
-    "wacr": ("compression_ratio", "max" or "avg"),  # as needed
+    "wacr": ("compression_ratio", "max"),  # as needed
     "total compression time": ("compression_time", "sum"),
     "peak compression memory": ("compression_memory", "max"),
     "total compression memory": ("compression_memory", "sum"),
@@ -25,91 +33,75 @@ METRIC_MAP = {
     "total decompression cpu usage": ("decompression_cpu_usage", "sum"),
 }
 
-
 class ScatterPlotGenerator:
-    def __init__(self):
-        if not DATABASE_URL:
-            raise ValueError("DATABASE_URL is not set.")
-        self.engine = create_engine(DATABASE_URL)
-
     def calculate_wacr(self, filtered: pd.DataFrame, comp: str, ctype: str) -> float:
         """
-        Calculates the WACR value based on the filtered dataframe.
-        For cmix, gzip, and paq8px, returns hardcoded values.
-        Otherwise, calculates as sum(original_size)/sum(compressed_size).
+        For a given compressor (comp) and compressor type (ctype), search the provided
+        filtered DataFrame (which should already be filtered to dataset_id == "total")
+        and return the compression_ratio value. If no such document exists, return a default
+        value based on the compressor.
         """
-        if filtered.empty:
-            if comp == "cmix":
-                return 4.25 if ctype == "proposed" else 4.28
-            elif comp == "gzip":
-                return 4.13 if ctype == "proposed" else 3.64
-            elif comp == "paq8px":
-                return 4.24 if ctype == "proposed" else 4.3
+        try:
+            if filtered.empty:
+                print(f"[WARNING] No Total data found for {comp} ({ctype}). Returning default WACR value.")
+                if comp == "cmix":
+                    return 4.25 if ctype == "proposed" else 4.28
+                elif comp == "gzip":
+                    return 4.13 if ctype == "proposed" else 3.64
+                elif comp == "paq8px":
+                    return 4.24 if ctype == "proposed" else 4.3
+                else:
+                    return 0
             else:
-                return 0
-        else:
-            if comp == "cmix":
-                return 4.25 if ctype == "proposed" else 4.28
-            elif comp == "gzip":
-                return 4.13 if ctype == "proposed" else 3.64
-            elif comp == "paq8px":
-                return 4.24 if ctype == "proposed" else 4.3
-            else:
-                sum_original = filtered["original_size"].sum()
-                sum_compressed = filtered["compressed_size"].sum()
-                return round(sum_original / sum_compressed, 4) if sum_compressed else 0
-
+                # Return the compression_ratio from the first matching "Total" document.
+                return filtered.iloc[0].get("compression_ratio", 0)
+        except Exception as e:
+            print(f"[ERROR] calculate_wacr failed for {comp} ({ctype}): {e}")
+            return 0
+        
     def generate_scatter_plot(self, json_folder: str, x_metric: str = "WACR", y_metric: str = "Total Decompression Time") -> str:
         try:
-            # Ensure necessary columns are fetched (including original_size, compressed_size)
-            result_df = pd.read_sql(
-                "SELECT dataset_id, compressor, compressor_type, compression_ratio, decompression_time, compression_time, compression_memory, compression_cpu_usage, decompression_memory, decompression_cpu_usage, original_size, compressed_size FROM result_comparison",
-                self.engine
-            )
-
-            if result_df.empty:
-                raise ValueError("No data in result_comparison table.")
-
-            # Normalize values
-            result_df['compressor_type'] = result_df['compressor_type'].str.strip(
-            ).str.lower()
+            # Retrieve all documents from the MongoDB collection and convert to DataFrame.
+            documents = list(collection.find())
+            if not documents:
+                raise ValueError("No data in results collection.")
+            result_df = pd.DataFrame(documents)
+            
+            # Normalize string fields.
+            result_df['compressor_type'] = result_df['compressor_type'].str.strip().str.lower()
             result_df['compressor'] = result_df['compressor'].str.strip().str.lower()
 
+            # Get list of compressors.
             compressors = sorted(result_df['compressor'].unique())
             base_colors = plotly.colors.qualitative.Plotly
-            color_map = {comp: base_colors[i % len(
-                base_colors)] for i, comp in enumerate(compressors)}
+            color_map = {comp: base_colors[i % len(base_colors)] for i, comp in enumerate(compressors)}
 
-            # Define a list of marker symbols (excluding triangle-based shapes)
-            marker_symbols = ["circle", "square", "diamond",
-                              "cross", "x", "star", "hexagon", "pentagon"]
-            comp_shapes = {comp: marker_symbols[i % len(
-                marker_symbols)] for i, comp in enumerate(compressors)}
+            # Define marker symbols.
+            marker_symbols = ["circle", "square", "diamond", "cross", "x", "star", "hexagon", "pentagon"]
+            comp_shapes = {comp: marker_symbols[i % len(marker_symbols)] for i, comp in enumerate(compressors)}
 
-            # Helper to adjust color shade
+            # Utility to adjust color shade.
             def adjust_color(color, factor):
                 import colorsys
                 color = color.lstrip('#')
                 lv = len(color)
-                rgb = tuple(int(color[i:i + lv // 3], 16)
-                            for i in range(0, lv, lv // 3))
+                rgb = tuple(int(color[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
                 h, l, s = colorsys.rgb_to_hls(*(v / 255 for v in rgb))
                 l = max(0, min(1, l * factor))
                 r, g, b = colorsys.hls_to_rgb(h, l, s)
                 return f'#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}'
 
-            # Map metric names to DB columns and aggregation
+            # Map metric names.
             x_key = x_metric.lower().strip()
             y_key = y_metric.lower().strip()
             if x_key not in METRIC_MAP or y_key not in METRIC_MAP:
-                raise ValueError(
-                    f"Unsupported metric(s): {x_metric}, {y_metric}")
+                raise ValueError(f"Unsupported metric(s): {x_metric}, {y_metric}")
             x_col, x_agg = METRIC_MAP[x_key]
             y_col, y_agg = METRIC_MAP[y_key]
 
             fig = go.Figure()
 
-            # For each compressor, plot standard and proposed as different shades and markers
+            # For each compressor and for each compressor type, produce plot data.
             for comp in compressors:
                 for ctype, factor in zip(['standard', 'proposed'], [1.2, 0.8]):
                     sub_df = result_df[
@@ -119,13 +111,13 @@ class ScatterPlotGenerator:
                     if sub_df.empty:
                         continue
 
-                    # Group by dataset_id for aggregation
+                    # Group by dataset_id when needed.
                     grouped = sub_df.groupby('dataset_id')
 
-                    # Calculate x value
+                    # Calculate x value.
                     if x_key == "wacr":
-                        filtered = sub_df[sub_df['dataset_id'].str.lower(
-                        ) == "total"]
+                        # Filter to where dataset_id == "total" for this combination.
+                        filtered = sub_df[sub_df['dataset_id'].str.lower() == "total"]
                         x_val = self.calculate_wacr(filtered, comp, ctype)
                     else:
                         if x_agg == "avg":
@@ -137,10 +129,12 @@ class ScatterPlotGenerator:
                         else:
                             x_val = grouped[x_col].first()
 
-                    # Calculate y value
-                    if y_key == "wacr":
-                        filtered = sub_df[sub_df['dataset_id'].str.lower(
-                        ) == "total"]
+                    # Calculate y value.
+                    if y_key == "total decompression time":
+                        filtered = sub_df[sub_df['dataset_id'].str.lower() == "total"]
+                        y_val = filtered[y_col].sum() if not filtered.empty else 0
+                    elif y_key == "wacr":
+                        filtered = sub_df[sub_df['dataset_id'].str.lower() == "total"]
                         y_val = self.calculate_wacr(filtered, comp, ctype)
                     else:
                         if y_agg == "avg":
@@ -152,12 +146,19 @@ class ScatterPlotGenerator:
                         else:
                             y_val = grouped[y_col].first()
 
+                    # Ensure x_val and y_val are iterable.
+                    if not hasattr(x_val, '__iter__'):
+                        x_val = [x_val]
+                    if not hasattr(y_val, '__iter__'):
+                        y_val = [y_val]
+
                     merged = pd.DataFrame({
                         'x': x_val,
                         'y': y_val
                     }).dropna()
                     if merged.empty:
                         continue
+
                     label = ('S' if ctype == 'standard' else 'P') + '-' + comp
                     fig.add_trace(go.Scatter(
                         x=merged['x'],
@@ -168,10 +169,9 @@ class ScatterPlotGenerator:
                             size=10,
                             opacity=0.8,
                             color=adjust_color(color_map[comp], factor),
-                            # Use assigned new shape for compressor
                             symbol=comp_shapes[comp]
                         ),
-                        text=merged.index,  # dataset_id
+                        text=merged.index,  # dataset_id labels
                     ))
 
             fig.update_layout(
@@ -179,14 +179,14 @@ class ScatterPlotGenerator:
                 paper_bgcolor='white',
                 xaxis=dict(
                     title=x_metric,
-                    showline=True,        # Show x-axis line
+                    showline=True,
                     linecolor='black',
                     linewidth=1,
                     mirror=False
                 ),
                 yaxis=dict(
-                    title=f"{y_metric} (s)",   # <-- Add unit in bracket
-                    showline=True,        # Show y-axis line
+                    title=f"{y_metric} (s)",
+                    showline=True,
                     linecolor='black',
                     linewidth=1,
                     mirror=False
@@ -196,10 +196,8 @@ class ScatterPlotGenerator:
             )
 
             os.makedirs(json_folder, exist_ok=True)
-            json_path = os.path.join(
-                json_folder, f"{x_key.replace(' ', '_')}_vs_{y_key.replace(' ', '_')}.json")
+            json_path = os.path.join(json_folder, f"{x_key.replace(' ', '_')}_vs_{y_key.replace(' ', '_')}.json")
             fig.write_json(json_path)
-
             return fig.to_json()
 
         except Exception as e:
@@ -207,11 +205,5 @@ class ScatterPlotGenerator:
             raise
 
     def generate_and_save(self):
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        json_dir = os.path.join(base_dir, 'data', 'plot_metadata')
-        return self.generate_scatter_plot(json_dir)
-
-# # Uncomment to test directly
-# if __name__ == "__main__":
-#     spg = ScatterPlotGenerator()
-#     spg.generate_scatter_plot('data/plot_metadata', "WACR", "Total Decompression Time")
+        base_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'plot_metadata')
+        return self.generate_scatter_plot(base_dir)
