@@ -105,39 +105,26 @@ class PlotGenerator:
                         (result_df['compressor_type'] == ctype)
                     ]
 
-                    # --- NEW LOGIC START ---
-                    # If metric is "total", use only dataset_id == "total"
-                    if "total" in key:
+                    # --- MODIFIED LOGIC START ---
+                    # For WACR, fetch dataset_id == "wacr"
+                    if key == "wacr":
+                        filtered = filtered[filtered['dataset_id'].str.lower() == "wacr"]
+                    # For "peak" in column name, fetch dataset_id == "peak"
+                    elif "peak" in value_col:
+                        filtered = filtered[filtered['dataset_id'].str.lower() == "peak"]
+                    # For "total" in column name or metric, fetch dataset_id == "total"
+                    elif "total" in value_col or "total" in key:
                         filtered = filtered[filtered['dataset_id'].str.lower() == "total"]
-                    # If metric is "average", ignore dataset_id == "total"
+                    # For "average" in key, ignore dataset_id == "total"
                     elif "average" in key:
                         filtered = filtered[filtered['dataset_id'].str.lower() != "total"]
-                    # --- NEW LOGIC END ---
+                    # --- MODIFIED LOGIC END ---
 
                     if filtered.empty:
-                        if key == "wacr":
-                            if comp == "cmix":
-                                value = 4.25 if ctype == "proposed" else 4.28
-                            elif comp == "gzip":
-                                value = 4.13 if ctype == "proposed" else 3.64
-                            elif comp == "paq8px":
-                                value = 4.24 if ctype == "proposed" else 4.3
-                            else:
-                                value = 0
-                        else:
-                            value = 0
+                        value = 0
                     else:
                         if key == "wacr":
-                            if comp == "cmix":
-                                value = 4.25 if ctype == "proposed" else 4.28
-                            elif comp == "gzip":
-                                value = 4.13 if ctype == "proposed" else 3.64
-                            elif comp == "paq8px":
-                                value = 4.24 if ctype == "proposed" else 4.3
-                            else:
-                                sum_original = filtered["original_size"].sum()
-                                sum_compressed = filtered["compressed_size"].sum()
-                                value = round(sum_original / sum_compressed, 4) if sum_compressed else 0
+                            value = filtered[value_col].iloc[0] if value_col in filtered else 0
                         elif agg_type == "max":
                             value = filtered[value_col].max()
                         elif agg_type == "sum":
@@ -145,10 +132,13 @@ class PlotGenerator:
                         elif agg_type == "avg" or agg_type == "mean":
                             value = filtered[value_col].mean()
                         else:
-                            value = 0
+                            value = filtered[value_col].iloc[0] if value_col in filtered else 0
 
                     if "memory" in value_col:
                         value = value / 1024 if value else 0
+
+                    # Log the x and y values (bar chart: x=comp, y=value)
+                    print(f"Encoder: {comp}, Type: {ctype}, {y_axis_label}: {value}")
 
                     bar_data[ctype].append(value)
 

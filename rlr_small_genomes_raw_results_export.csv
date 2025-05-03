@@ -191,3 +191,19 @@ _id,compressor,compressor_type,dataset_id,compression_cpu_usage,dataset_type,com
 6815db4f1969d4a304aecca5,zpaq,proposed,Total ,0.0,dna,0.0,3496.0,1279055.0,1.0,1.0,740.0,740.0
 6815db4f1969d4a304aecca6,cmix,standard,Total ,18.0,dna,18.0,3836.0,1279055.0,0.0,0.0,0.0,0.0
 6815db4f1969d4a304aecca7,cmix,proposed,Total ,17.0,dna,17.0,3586.0,1279055.0,0.0,0.0,0.0,0.0
+68164d491969d4a304aece6a,7-zip,standard,WACR,,dna,,3.9,0.0,,,,
+68164d4a1969d4a304aece6b,7-zip,proposed,WACR,,dna,,4.14,0.0,,,,
+68164d4a1969d4a304aece6c,paq8px,standard,WACR,,dna,,4.4,0.0,,,,
+68164d4a1969d4a304aece6d,paq8px,proposed,WACR,,dna,,4.27,0.0,,,,
+68164d4a1969d4a304aece6e,bsc,standard,WACR,,dna,,4.08,0.0,,,,
+68164d4a1969d4a304aece6f,bsc,proposed,WACR,,dna,,4.09,0.0,,,,
+68164d4a1969d4a304aece70,gzip,standard,WACR,,dna,,3.73,0.0,,,,
+68164d4a1969d4a304aece71,gzip,proposed,WACR,,dna,,4.13,0.0,,,,
+68164d4a1969d4a304aece72,zstd,standard,WACR,,dna,,4.12,0.0,,,,
+68164d4a1969d4a304aece73,zstd,proposed,WACR,,dna,,4.19,0.0,,,,
+68164d4a1969d4a304aece74,bzip2,standard,WACR,,dna,,3.78,0.0,,,,
+68164d4a1969d4a304aece75,bzip2,proposed,WACR,,dna,,4.03,0.0,,,,
+68164d4a1969d4a304aece76,zpaq,standard,WACR,,dna,,4.03,0.0,,,,
+68164d4a1969d4a304aece77,zpaq,proposed,WACR,,dna,,4.04,0.0,,,,
+68164d4a1969d4a304aece78,cmix,standard,WACR,,dna,,4.4,0.0,,,,
+68164d4a1969d4a304aece79,cmix,proposed,WACR,,dna,,4.25,0.0,,,,
