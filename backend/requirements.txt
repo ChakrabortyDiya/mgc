@@ -11,4 +11,4 @@ python-dotenv==1.0.1
 pymongo==4.10.1
 certifi==2024.12.14
 dnspython==2.7.0
-kaleidoscope==0.2.0
+kaleido==0.2.1
