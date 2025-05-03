@@ -13,8 +13,8 @@ if not MONGODB_URI:
 
 # Connect to MongoDB and choose the desired database and collection.
 client = MongoClient(MONGODB_URI)
-db = client["rlr_small_genomes_raw"]  # Use your normalized DB name here
-#db = client["rlr_dna_raw"]  # Use your normalized DB name here
+# db = client["rlr_small_genomes_raw"]  # Use your normalized DB name here
+db = client["rlr_dna_raw"]  # Use your normalized DB name here
 collection = db["results"]
 
 class ScatterPlotGenerator:
@@ -74,10 +74,22 @@ class ScatterPlotGenerator:
             # Define which column to use for total time
             y_col = "decompression_time" if y_metric.lower().startswith("total decompression") else "compression_time"
 
+            def adjust_color(color, factor):
+                import colorsys
+                color = color.lstrip('#')
+                lv = len(color)
+                rgb = tuple(int(color[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+                h, l, s = colorsys.rgb_to_hls(*(v / 255 for v in rgb))
+                l = max(0, min(1, l * factor))
+                r, g, b = colorsys.hls_to_rgb(h, l, s)
+                return f'#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}'
+
             fig = go.Figure()
             print("Compressor\tType\tWACR\tTotal Decompression Time\tOriginal Size\tCompressed Size")
+            # Use a base and a much darker shade for 'standard' and 'proposed'
+            # 0.6 = much darker, 1.0 = base
             for comp in compressors:
-                for ctype, factor in zip(['standard', 'proposed'], [1.2, 0.8]):
+                for ctype, factor in zip(['standard', 'proposed'], [0.6, 1.0]):
                     row = self.get_total_row(df, comp, ctype)
                     if row is None:
                         continue
@@ -106,6 +118,9 @@ class ScatterPlotGenerator:
                     orig_size = row.get("original_size", 0)
                     comp_size = row.get("compressed_size", 0)
 
+                    # Use a much darker shade for 'standard', base for 'proposed'
+                    marker_color = adjust_color(color_map[comp], factor)
+
                     # Log WACR vs TDT for all, with sizes
                     print(f"{comp}\t{ctype}\t{x_val}\t{y_val}\t{orig_size}\t{comp_size}")
 
@@ -118,7 +133,7 @@ class ScatterPlotGenerator:
                         marker=dict(
                             size=10,
                             opacity=0.8,
-                            color=color_map[comp],
+                            color=marker_color,
                             symbol=comp_shapes[comp]
                         ),
                         text=[row['dataset_id']],

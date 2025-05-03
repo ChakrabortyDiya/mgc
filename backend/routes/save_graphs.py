@@ -2,9 +2,11 @@ import os
 import plotly.io as pio
 
 # Directory containing your plot JSON files
-BAR_JSON_DIR = r'd:\MGC\mgc\data\plot_metadata'
-SCATTER_JSON_DIR = r'd:\MGC\mgc\data\plot_metadata'  # Change if scatter plots are in a different folder
-OUTPUT_DIR = r'd:\MGC\mgc\data\plot_images'
+# BAR_JSON_DIR = r'd:\MGC\mgc\data\plot_metadata'
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+BAR_JSON_DIR = os.path.join(BASE_DIR, 'data', 'plot_metadata')  # For bar plots
+SCATTER_JSON_DIR = os.path.join(BASE_DIR, 'backend', 'data', 'plot_metadata')  # For scatter plots
+OUTPUT_DIR = os.path.join(BASE_DIR, 'data', 'plot_images')
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
