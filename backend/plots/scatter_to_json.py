@@ -27,17 +27,35 @@ class ScatterPlotGenerator:
         ]
         return filtered.iloc[0] if not filtered.empty else None
 
+    def get_wacr_row(self, df: pd.DataFrame, comp: str, ctype: str):
+        """Return the row where dataset_id == 'Total' for the given compressor and type."""
+        filtered = df[
+            (df['compressor'] == comp) &
+            (df['compressor_type'] == ctype) &
+            (df['dataset_id'].str.lower() == "wacr")
+        ]
+        # print(f"Filtered WACR row: {filtered.head()}")
+        # print("passed the function get_wacr_row")
+        # print(f"filtered row size: {len(filtered)}")
+        if len(filtered) == 0:
+            print("No WACR row found")
+            return None
+        return filtered.iloc[0] if not filtered.empty else None
+    
     def calculate_wacr(self, row) -> float:
         """
         Calculate WACR as sum(original_size) / sum(compressed_size) for the 'Total' row.
         If not available, return a default value based on the compressor.
         """
         if row is None:
+            print("No row found for WACR calculation")
             return 0
         try:
-            sum_original = row.get("original_size", 0)
+            # print(f"Row for WACR calculation: {row}")
+            # sum_original = row.get("original_size", 0)
             sum_compressed = row.get("compressed_size", 0)
-            return round(sum_original / sum_compressed, 4) if sum_compressed else 0
+            # return round(sum_original / sum_compressed, 4) if sum_compressed else 0
+            return round(sum_compressed, 4) if sum_compressed else 0
         except Exception as e:
             print(f"[ERROR] calculate_wacr failed: {e}")
             return 0
@@ -52,7 +70,7 @@ class ScatterPlotGenerator:
             print(f"[ERROR] get_total_time failed: {e}")
             return 0
 
-    def generate_scatter_plot(self, json_folder: str, x_metric: str = "WACR", y_metric: str = "Total Decompression Time") -> str:
+    def generate_scatter_plot(self, json_folder: str, x_metric: str = "WACR", y_metric: str = "Total Compression Time") -> str:
         try:
             # Retrieve all documents and build DataFrame.
             documents = list(collection.find())
@@ -65,7 +83,9 @@ class ScatterPlotGenerator:
             df['compressor'] = df['compressor'].str.strip().str.lower()
             df['dataset_id'] = df['dataset_id'].str.strip()
 
-            compressors = sorted(df['compressor'].unique())
+            # compressors = sorted(df['compressor'].unique())
+            compressors = ['7-zip', 'paq8px', 'bsc',
+                           'gzip', 'zstd', 'bzip2', 'zpaq', 'cmix']
             base_colors = plotly.colors.qualitative.Plotly
             color_map = {comp: base_colors[i % len(base_colors)] for i, comp in enumerate(compressors)}
             marker_symbols = ["circle", "square", "diamond", "cross", "x", "star", "hexagon", "pentagon"]
@@ -85,7 +105,7 @@ class ScatterPlotGenerator:
                 return f'#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}'
 
             fig = go.Figure()
-            print("Compressor\tType\tWACR\tTotal Decompression Time\tOriginal Size\tCompressed Size")
+            # print("Compressor\tType\tWACR\tTotal Decompression Time\tOriginal Size\tCompressed Size")
             # Use a base and a much darker shade for 'standard' and 'proposed'
             # 0.6 = much darker, 1.0 = base
             for comp in compressors:
@@ -93,10 +113,12 @@ class ScatterPlotGenerator:
                     row = self.get_total_row(df, comp, ctype)
                     if row is None:
                         continue
-
+                    row1 = self.get_wacr_row(df, comp, ctype)
+                    if row1 is None:
+                        continue
                     # X value: WACR (always from 'Total' row)
                     if x_metric.lower() == "wacr":
-                        x_val = self.calculate_wacr(row)
+                        x_val = self.calculate_wacr(row1)
                     elif x_metric.lower().startswith("total decompression"):
                         x_val = self.get_total_time(row, "decompression_time")
                     elif x_metric.lower().startswith("total compression"):
@@ -122,7 +144,7 @@ class ScatterPlotGenerator:
                     marker_color = adjust_color(color_map[comp], factor)
 
                     # Log WACR vs TDT for all, with sizes
-                    print(f"{comp}\t{ctype}\t{x_val}\t{y_val}\t{orig_size}\t{comp_size}")
+                    # print(f"{comp}\t{ctype}\t{x_val}\t{y_val}\t{orig_size}\t{comp_size}")
 
                     label = ('S' if ctype == 'standard' else 'P') + '-' + comp
                     fig.add_trace(go.Scatter(
@@ -150,7 +172,7 @@ class ScatterPlotGenerator:
                     mirror=False
                 ),
                 yaxis=dict(
-                    title=f"TDT (s)",
+                    title=f"TCT (s)",
                     showline=True,
                     linecolor='black',
                     linewidth=1,
