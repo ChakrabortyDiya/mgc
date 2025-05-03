@@ -1,6 +1,9 @@
-backend\plots\__pycache__
-backend\plots\*.cpython-*.pyc
-backend\plots\tempCodeRunnerFile.py
-backend\.env
-**\__pycache__\
-**\*.pyc
+# Ignore environment variable definitions
+.env
+
+# Ignore Python bytecode and caches
+__pycache__/
+*.py[cod]
+
+# Ignore any files starting with tempcoderunner
+tempcoderunner*
