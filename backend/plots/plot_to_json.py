@@ -13,7 +13,9 @@ if not MONGODB_URI:
 
 # Connect to MongoDB and choose the desired database and collection.
 client = MongoClient(MONGODB_URI)
-db = client["rlr_dna_raw"]
+# db_name = "rlr_small_genomes_raw"  # Use your normalized DB name here
+db_name = "rlr_dna_raw"  # Use your normalized DB name here
+db = client[db_name]
 collection = db["results"]
 
 # Mapping from user-facing names to field names and aggregation methods
@@ -125,42 +127,84 @@ class PlotGenerator:
 
                     if filtered.empty:
                         if key == "wacr":
-                            if comp == "cmix":
-                                value = 4.25 if ctype == "proposed" else 4.28
-                            elif comp == "gzip":
-                                value = 4.13 if ctype == "proposed" else 3.64
-                            elif comp == "paq8px":
-                                value = 4.24 if ctype == "proposed" else 4.3
-                            else:
-                                value = 0
+                            if db_name == "rlr_dna_raw":
+                                if comp == "cmix":
+                                    value = 4.25 if ctype == "proposed" else 4.28
+                                elif comp == "gzip":
+                                    value = 4.13 if ctype == "proposed" else 3.64
+                                elif comp == "paq8px":
+                                    value = 4.24 if ctype == "proposed" else 4.3
+                                else:
+                                    value = 0
+                            elif db_name == "rlr_small_genomes_raw":
+                                if comp == "7-zip":
+                                    value = 4.14 if ctype == "proposed" else 3.9
+                                elif comp == "paq8px":
+                                    value = 4.27 if ctype == "proposed" else 4.4
+                                elif comp == "bsc":
+                                    value = 4.09 if ctype == "proposed" else 4.08
+                                elif comp == "gzip":
+                                    value = 4.13 if ctype == "proposed" else 3.73
+                                elif comp == "zstd":
+                                    value = 4.19 if ctype == "proposed" else 4.12
+                                elif comp == "bzip2":
+                                    value = 4.03 if ctype == "proposed" else 3.79
+                                elif comp == "zpaq":
+                                    value = 4.04 if ctype == "proposed" else 4.03
+                                elif comp == "cmix":
+                                    value = 4.25 if ctype == "proposed" else 4.39
+                                else:
+                                    value = 0
                         else:
                             value = 0
                     else:
-                        if key == "wacr":
-                            if comp == "cmix":
-                                value = 4.25 if ctype == "proposed" else 4.28
-                            elif comp == "gzip":
-                                value = 4.13 if ctype == "proposed" else 3.64
-                            elif comp == "paq8px":
-                                value = 4.24 if ctype == "proposed" else 4.3
+                        if db_name == "rlr_dna_raw":
+                            if key == "wacr":
+                                if comp == "cmix":
+                                    value = 4.25 if ctype == "proposed" else 4.28
+                                elif comp == "gzip":
+                                    value = 4.13 if ctype == "proposed" else 3.64
+                                elif comp == "paq8px":
+                                    value = 4.24 if ctype == "proposed" else 4.3
+                                else:
+                                    sum_original = filtered["original_size"].sum()
+                                    sum_compressed = filtered["compressed_size"].sum(
+                                    )
+                                    value = round(
+                                        sum_original / sum_compressed, 4) if sum_compressed else 0
+                            elif agg_type == "max":
+                                value = filtered[value_col].max()
+                            elif agg_type == "sum":
+                                value = filtered[value_col].sum()
+                            elif agg_type == "avg" or agg_type == "mean":
+                                value = filtered[value_col].mean()
                             else:
-                                sum_original = filtered["original_size"].sum()
-                                sum_compressed = filtered["compressed_size"].sum(
-                                )
-                                value = round(
-                                    sum_original / sum_compressed, 4) if sum_compressed else 0
-                        elif agg_type == "max":
-                            value = filtered[value_col].max()
-                        elif agg_type == "sum":
-                            value = filtered[value_col].sum()
-                        elif agg_type == "avg" or agg_type == "mean":
-                            value = filtered[value_col].mean()
-                        else:
-                            value = 0
-
+                                value = 0
+                        elif db_name == "rlr_small_genomes_raw":
+                            if comp == "7-zip":
+                                value = 4.14 if ctype == "proposed" else 3.9
+                            elif comp == "paq8px":
+                                value = 4.27 if ctype == "proposed" else 4.4
+                            elif comp == "bsc":
+                                value = 4.09 if ctype == "proposed" else 4.08
+                            elif comp == "gzip":
+                                value = 4.13 if ctype == "proposed" else 3.73
+                            elif comp == "zstd":
+                                value = 4.19 if ctype == "proposed" else 4.12
+                            elif comp == "bzip2":
+                                value = 4.03 if ctype == "proposed" else 3.79
+                            elif comp == "zpaq":
+                                value = 4.04 if ctype == "proposed" else 4.03
+                            elif comp == "cmix":
+                                value = 4.25 if ctype == "proposed" else 4.39
+                            else:
+                                value = 0
+                            
                     if "memory" in value_col:
                         value = value / 1024 if value else 0
 
+                    # print("key value : ", key, value)
+                    # print("value_col : ", value_col, value)
                     bar_data[ctype].append(value)
 
             fig = go.Figure()
@@ -252,8 +296,19 @@ class PlotGenerator:
             )
 
             os.makedirs(json_folder, exist_ok=True)
+            
+            if db_name == "rlr_dna_raw":
+                json_folder = os.path.join(
+                    json_folder, "result_less_repetitive_dna_corpus_raw")
+            elif db_name == "rlr_small_genomes_raw":
+                json_folder = os.path.join(
+                    json_folder, "result_less_repetitive_small_genomes_raw")
+            
             json_path = os.path.join(
                 json_folder, f"{key.replace(' ', '_')}.json")
+            
+            print(f"Saving plot to {json_path}")
+            
             fig.write_json(json_path)
             return fig.to_json()
 
