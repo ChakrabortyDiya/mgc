@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Loader from "./ui/loader";
@@ -10,11 +10,11 @@ export function QuickSelector() {
   const [testData, setTestData] = useState({
     genomes: {
       DNA_Corpus: {
-        size: "DNA Corpus(raw)",
-        checked: false,
+        size: "DNA Corpus 1",
+        checked: true,
       },
       DNA: {
-        size: "Less repetitive benchmark genome sequences",
+        size: "DNA Corpus 2",
         checked: false,
       },
     },
@@ -115,6 +115,21 @@ export function QuickSelector() {
   const handleBarClick = (option: string, type: "barchart" | "scatterplot") => {
     fetchData(option, type);
   };
+  const [options, setOptions] = useState<string[]>([]);
+  useEffect(() => {
+    if (testData.genomes["DNA"].checked){
+      setOptions(["WACR"])
+    } 
+    else {
+      setOptions(["WACR",
+                "TCT",
+                "PCM",
+                "PCC",
+                "TDT",
+                "PDM",
+                "PDC",])
+    }
+  },[testData]);
   console.log(handleBarClick);
   return (
     <div>
@@ -176,15 +191,7 @@ export function QuickSelector() {
           <div className="flex items-start space-x-4">
             <span className="text-[#0066CC] font-medium w-24">Metrics</span>
             <div className="flex flex-wrap gap-2">
-              {[
-                "WACR",
-                "Total Compression Time",
-                "Peak Compression Memory",
-                "Compression CPU",
-                "Total Decompression Time",
-                "Peak Decompression Memory",
-                "Decompression CPU",
-              ].map((option) => (
+              {options.map((option) => (
                 <button
                   key={option}
                   onClick={() => router.push(`/${option.toLowerCase().replace(/\s+/g, "_")}`)}
@@ -206,8 +213,8 @@ export function QuickSelector() {
             <span className="text-[#8B4513] font-medium">
               Scatterplot (Space-Time Tradeoff)
             </span>
-            <div className="flex flex-wrap gap-2">
-              {["WACR -vs- Total Decompression Time"].map((option) => (
+            {testData.genomes["DNA_Corpus"].checked && <div className="flex flex-wrap gap-2">
+              {["WACR -vs- TCT"].map((option) => (
                 <button
                   key={option}
                   onClick={() => router.push("/" + option.toLowerCase().replace(/\s+/g, "_"))}
@@ -220,7 +227,7 @@ export function QuickSelector() {
                   {option}
                 </button>
               ))}
-            </div>
+            </div>}
           </div>
         </div>
       </div>

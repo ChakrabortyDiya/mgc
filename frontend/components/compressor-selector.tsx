@@ -110,14 +110,14 @@ export function CompressorSelector({
               onChange={(e) => setSelectedStandard(Array.from(e.target.selectedOptions, (option) => option.value))}
               disabled={!compressorTypes.standard}
             >
-              <option>s-7zip</option>
-              <option>s-paq8</option>
-              <option>s-bsc</option>
-              <option>s-gzip</option>
-              <option>s-zstd</option>
-              <option>s-bzip2</option>
-              <option>s-zpaq</option>
-              <option>s-cmix</option>
+              <option>S-7zip</option>
+              <option>S-paq8px</option>
+              <option>S-bsc</option>
+              <option>S-gzip</option>
+              <option>S-zstd</option>
+              <option>S-bzip2</option>
+              <option>S-zpaq</option>
+              <option>S-cmix</option>
             </select>
           </div>
 
@@ -130,14 +130,14 @@ export function CompressorSelector({
               onChange={(e) => setSelectedProposed(Array.from(e.target.selectedOptions, (option) => option.value))}
               disabled={!compressorTypes.proposed}
             >
-              <option>p-7zip</option>
-              <option>p-paq8</option>
-              <option>p-bsc</option>
-              <option>p-gzip</option>
-              <option>p-zstd</option>
-              <option>p-bzip2</option>
-              <option>p-zpaq</option>
-              <option>p-cmix</option>
+              <option>P-7zip</option>
+              <option>P-paq8px</option>
+              <option>P-bsc</option>
+              <option>P-gzip</option>
+              <option>P-zstd</option>
+              <option>P-bzip2</option>
+              <option>P-zpaq</option>
+              <option>P-cmix</option>
             </select>
           </div>
         </div>

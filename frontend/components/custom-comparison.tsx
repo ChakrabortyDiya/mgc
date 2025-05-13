@@ -44,40 +44,39 @@ export function CustomComparison({
   };
 
   const genomes = [
-    "AeCa (1,554 kB)",
-    "AgPh (43 kB)",
-    "AnCa (1,38,858 kB)",
     "BuEb (19 kB)",
-    "DaRe (61,099 kB)",
-    "DrMe (31,428 kB)",
-    "EnIn (25,785 kB)",
-    "EsCo (4,533 kB)",
-    "GaGa (1,45,052 kB)",
-    "HaHi (3,799 kB)",
-    "HePy (1,629 kB)",
-    "HoSa (1,85,306 kB)",
-    "OrSa (42,249 kB)",
-    "PlFa (8,777 kB)",
-    "ScPo (10,403 kB)",
-    "WaMe (8,931 kB)",
-    "YeMi (72 kB)",
+  "AgPh (43 kB)",
+  "YeMi (72 kB)",
+  "HaHi (3,799 kB)",
+  "EsCo (4,533 kB)",
+  "PlFa (8,777 kB)",
+  "WaMe (8,931 kB)",
+  "ScPo (10,403 kB)",
+  "EnIn (25,785 kB)",
+  "DrMe (31,428 kB)",
+  "OrSa (42,249 kB)",
+  "DaRe (61,099 kB)",
+  "AeCa (1,554 kB)",
+  "HePy (1,629 kB)",
+  "AnCa (1,38,858 kB)",
+  "GaGa (1,45,052 kB)",
+  "HoSa (1,85,306 kB)",
   ];
 
   const datasets = {
     dna: [
-      "GCA 000001405.28 (9,42,286 kB)",
-      "GCA 000165345.1 (9,001 kB)",
-      "GCA 000188695.1 (54,835 kB)",
-      "GCA 000211355.2 (1,673 kB)",
-      "GCA 000350225.2 (1,03,894 kB)",
-      "GCA 000398605.1 (510 kB)",
-      "GCA 000497125.1 (12,835 kB)",
-      "GCA 000988165.1 (5,674 kB)",
-      "GCA 001606155.1 (23,119 kB)",
-      "GCA 002205965.2 (3,33,021 kB)",
-      "GCF 000002235.4 (9,84,246 kB)",
-      "GCF 000240135.3 (36,051 kB)",
-      "GCF 001884535.1 (50 kB)",
+      "humdyst (38,770 kB)",
+"humprtb (56,737 kB)",
+"humhdab (58,864 kB)",
+"humghcs (66,495 kB)",
+"humhbb (73,308 kB)",
+"mtpacga (100,314 kB)",
+"chmpxx (121,024 kB)",
+"chntxx (155,844 kB)",
+"mpomtcg (186,608 kB)",
+"vaccg (191,737 kB)",
+"hehcmv (229,354 kB)"
+
     ],
     rna: [
       "SILVA 132 LSURef (5,95,993 kB)",
@@ -101,9 +100,9 @@ export function CustomComparison({
           {/* DNA Corpus */}
           <div>
             <h4 className="text-sm font-medium text-gray-500 mb-2">
-              DNA Corpus (less repetitive)
+              DNA Corpus 1
             </h4>
-            <div className="border rounded-lg p-4 space-y-2 bg-white max-h-96 overflow-y-auto">
+            <div className="border rounded-lg p-4 space-y-2 bg-white max-h-60 overflow-y-auto">
               {genomes.map((genome) => (
                 <label key={genome} className="flex items-center space-x-2">
                   <input
@@ -121,7 +120,7 @@ export function CustomComparison({
           {/* DNA Datasets */}
           <div>
             <h4 className="text-sm font-medium text-gray-500 mb-2">
-              DNA datasets (less repetitive)
+              DNA Corpus 2
             </h4>
             <div className="border rounded-lg p-4 space-y-6 bg-white max-h-60 overflow-y-auto">
               <div className="space-y-2">
@@ -140,7 +139,7 @@ export function CustomComparison({
             </div>
 
             {/* RNA Datasets */}
-            <div className="mt-4">
+            {/* <div className="mt-4">
               <h4 className="text-sm font-medium text-gray-500 mb-2">
                 RNA datasets (highly repetitive)
               </h4>
@@ -159,9 +158,10 @@ export function CustomComparison({
                   ))}
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
+       <div className="h-6" />
       </div>
     </div>
   );

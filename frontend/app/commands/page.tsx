@@ -1,17 +1,26 @@
-import React from 'react';
-
-const CommandsPage: React.FC = () => {
+export default function CommandsPage() {
     return (
-        <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-            <h1>Commands</h1>
-            <p>Here is a list of available commands:</p>
-            <ul>
-                <li>Command 1</li>
-                <li>Command 2</li>
-                <li>Command 3</li>
-            </ul>
-        </div>
-    );
-};
+      <main className="min-h-screen bg-gray-50 py-10 px-4">
+        <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-2xl p-8">
+          <h1 className="text-2xl font-bold text-[#4A6EA9] mb-6">Commands & Resources</h1>
+  
+          {/* <ul className="list-disc pl-6 space-y-3 text-gray-800">
+            <li>
+              <a
+                href="https://github.com/Arno2003/NGC"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline hover:text-blue-800 transition-colors"
+              >
+                NGC Compression Tools & Commands
+              </a>
+            </li>
+          </ul> */}
 
-export default CommandsPage;
+          <p className="mt-6 text-gray-800">
+            Command and compressor details can be found <a href="https://github.com/Arno2003/NGC" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline hover:text-blue-800 transition-colors">here</a>.
+          </p>
+        </div>
+      </main>
+    );
+}
