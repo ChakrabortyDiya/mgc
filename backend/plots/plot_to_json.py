@@ -5,18 +5,18 @@ import plotly.graph_objects as go
 from dotenv import load_dotenv
 from pymongo import MongoClient
 
-# Load environment variables
-load_dotenv()
-MONGODB_URI = os.getenv("MONGODB_URI")
-if not MONGODB_URI:
-    raise ValueError("MONGODB_URI is not set in environment variables.")
+# # Load environment variables
+# load_dotenv()
+# MONGODB_URI = os.getenv("MONGODB_URI")
+# if not MONGODB_URI:
+#     raise ValueError("MONGODB_URI is not set in environment variables.")
 
-# Connect to MongoDB and choose the desired database and collection.
-client = MongoClient(MONGODB_URI)
-# db_name = "rlr_small_genomes_raw"  # Use your normalized DB name here
-db_name = "rlr_dna_raw"  # Use your normalized DB name here
-db = client[db_name]
-collection = db["results"]
+# # Connect to MongoDB and choose the desired database and collection.
+# client = MongoClient(MONGODB_URI)
+# # db_name = "rlr_small_genomes_raw"  # Use your normalized DB name here
+# db_name = "rlr_dna_raw"  # Use your normalized DB name here
+# db = client[db_name]
+# collection = db["results"]
 
 # Mapping from user-facing names to field names and aggregation methods
 METRIC_MAP = {
@@ -52,8 +52,28 @@ METRIC_COLOR_MAP = {
 class PlotGenerator:
     def __init__(self):
         # Use the MongoDB collection instead of a SQL engine
-        self.collection = collection
-
+        self.connect_to_db()
+        self.db_name = "rlr_dna_raw"  # Default database name
+    
+    def set_db_name(self, db_name: str) -> None:
+        """Set the database name for the MongoDB connection."""
+        self.db_name = db_name
+    
+    def connect_to_db(self, db_name: str = "rlr_dna_raw") -> None:
+        """Connect to the MongoDB database and collection."""
+        try:
+            MONGODB_URI = os.getenv("MONGODB_URI")
+            if not MONGODB_URI:
+                raise ValueError("MONGODB_URI is not set in environment variables.")
+            self.client = MongoClient(MONGODB_URI)
+            self.db = self.client[db_name]
+            self.collection = self.db["results"]
+            self.set_db_name(db_name)
+            print(f"[INFO] Connected to MongoDB database: {db_name}")
+        except Exception as e:
+            print(f"[ERROR] Failed to connect to MongoDB: {e}")
+            raise
+    
     def generate_plot_from_db(self, json_folder: str, data_name: str) -> str:
         try:
             # Retrieve all documents from the MongoDB collection and build a DataFrame.
@@ -127,7 +147,7 @@ class PlotGenerator:
 
                     if filtered.empty:
                         if key == "wacr":
-                            if db_name == "rlr_dna_raw":
+                            if self.db_name == "rlr_dna_raw":
                                 if comp == "cmix":
                                     value = 4.25 if ctype == "proposed" else 4.28
                                 elif comp == "gzip":
@@ -136,7 +156,7 @@ class PlotGenerator:
                                     value = 4.24 if ctype == "proposed" else 4.3
                                 else:
                                     value = 0
-                            elif db_name == "rlr_small_genomes_raw":
+                            elif self.db_name == "rlr_small_genomes_raw":
                                 if comp == "7-zip":
                                     value = 4.14 if ctype == "proposed" else 3.9
                                 elif comp == "paq8px":
@@ -158,7 +178,7 @@ class PlotGenerator:
                         else:
                             value = 0
                     else:
-                        if db_name == "rlr_dna_raw":
+                        if self.db_name == "rlr_dna_raw":
                             if key == "wacr":
                                 if comp == "cmix":
                                     value = 4.25 if ctype == "proposed" else 4.28
@@ -180,7 +200,7 @@ class PlotGenerator:
                                 value = filtered[value_col].mean()
                             else:
                                 value = 0
-                        elif db_name == "rlr_small_genomes_raw":
+                        elif self.db_name == "rlr_small_genomes_raw":
                             if comp == "7-zip":
                                 value = 4.14 if ctype == "proposed" else 3.9
                             elif comp == "paq8px":
@@ -297,10 +317,10 @@ class PlotGenerator:
 
             os.makedirs(json_folder, exist_ok=True)
             
-            if db_name == "rlr_dna_raw":
+            if self.db_name == "rlr_dna_raw":
                 json_folder = os.path.join(
                     json_folder, "result_less_repetitive_dna_corpus_raw")
-            elif db_name == "rlr_small_genomes_raw":
+            elif self.db_name == "rlr_small_genomes_raw":
                 json_folder = os.path.join(
                     json_folder, "result_less_repetitive_small_genomes_raw")
             
@@ -316,7 +336,11 @@ class PlotGenerator:
             print(f"[ERROR] generate_plot_from_db failed: {e}")
             raise
 
-    def generate_data_by_name(self, data_name: str) -> str:
+    def generate_data_by_name(self, benchmark_type: str, data_name: str) -> str:
         base_dir = os.path.join(os.path.dirname(os.path.dirname(
             os.path.dirname(__file__))), 'data', 'plot_metadata')
+        benchmark_type_list = ["rlr_dna_raw", "rlr_small_genomes_raw"]
+        if benchmark_type not in benchmark_type_list:
+            raise ValueError(f"Unsupported benchmark type: {benchmark_type}")
+        self.connect_to_db(benchmark_type)
         return self.generate_plot_from_db(base_dir, data_name)

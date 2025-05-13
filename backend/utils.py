@@ -5,6 +5,7 @@ class ScatterPlotData(BaseModel):
     name: str
 
 class MetricsPlotData(BaseModel):
+    benchmark_type: str
     name: str
     
 class TableData(BaseModel):

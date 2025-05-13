@@ -54,13 +54,14 @@ def get_dashboard_data(data: TableData):
 def get_plot(metrics_plot_data: MetricsPlotData):
     """Endpoint to generate a plot (barchart) based on the provided data name."""
     try:
+        benchmark_type = metrics_plot_data.benchmark_type
         data_name = metrics_plot_data.name
         # Normalize CPU names.
         if data_name == "compression_cpu":
             data_name = "compression_cpu_usage"
         elif data_name == "decompression_cpu":
             data_name = "decompression_cpu_usage"
-        json_data = plot_generator.generate_data_by_name(data_name)
+        json_data = plot_generator.generate_data_by_name(benchmark_type, data_name)
         fig_dict = json.loads(json_data)
         fig = go.Figure(fig_dict)
         html_plot = fig.to_html(full_html=False, include_plotlyjs="cdn")
