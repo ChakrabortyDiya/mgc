@@ -4,18 +4,21 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Loader from "./ui/loader";
+import { useGlobalContext } from "./GlobalContext";
 
 export function QuickSelector() {
   const router = useRouter();
+  const { selectedGenomeType, setSelectedGenomeType } = useGlobalContext();
+
   const [testData, setTestData] = useState({
     genomes: {
       DNA_Corpus: {
         size: "DNA Corpus 1",
-        checked: true,
+        checked: selectedGenomeType === "DNA_Corpus",
       },
       DNA: {
         size: "DNA Corpus 2",
-        checked: false,
+        checked: selectedGenomeType === "DNA",
       },
     },
   });
@@ -33,18 +36,20 @@ export function QuickSelector() {
     category: keyof typeof testData,
     selectedOption: string
   ) => {
+    setSelectedGenomeType(selectedOption);
+
     setTestData((prev) => {
       const updatedOptions = Object.entries(prev[category]).reduce(
         (acc, [option, value]) => {
-          acc[option as keyof typeof prev[typeof category]] = {
+          acc[option as keyof (typeof prev)[typeof category]] = {
             ...value,
-            checked: option === selectedOption, 
+            checked: option === selectedOption,
           };
           return acc;
         },
-        {} as typeof prev[typeof category]
+        {} as (typeof prev)[typeof category]
       );
-  
+
       return {
         ...prev,
         [category]: updatedOptions,
@@ -117,19 +122,12 @@ export function QuickSelector() {
   };
   const [options, setOptions] = useState<string[]>([]);
   useEffect(() => {
-    if (testData.genomes["DNA"].checked){
-      setOptions(["WACR"])
-    } 
-    else {
-      setOptions(["WACR",
-                "TCT",
-                "PCM",
-                "PCC",
-                "TDT",
-                "PDM",
-                "PDC",])
+    if (testData.genomes["DNA"].checked) {
+      setOptions(["WACR"]);
+    } else {
+      setOptions(["WACR", "TCT", "PCM", "PCC", "TDT", "PDM", "PDC"]);
     }
-  },[testData]);
+  }, [testData]);
   console.log(handleBarClick);
   return (
     <div>
@@ -194,7 +192,9 @@ export function QuickSelector() {
               {options.map((option) => (
                 <button
                   key={option}
-                  onClick={() => router.push(`/${option.toLowerCase().replace(/\s+/g, "_")}`)}
+                  onClick={() =>
+                    router.push(`/${option.toLowerCase().replace(/\s+/g, "_")}`)
+                  }
                   // onClick={() => handleBarClick(option, "barchart")}
                   className={`px-4 py-1 rounded-full border text-sm ${
                     selectedChartOptions?.includes(option)
@@ -209,26 +209,32 @@ export function QuickSelector() {
           </div>
 
           {/* Scatterplot Section */}
-          <div className="flex flex-wrap items-center gap-4">
-            <span className="text-[#8B4513] font-medium">
-              Scatterplot (Space-Time Tradeoff)
-            </span>
-            {testData.genomes["DNA_Corpus"].checked && <div className="flex flex-wrap gap-2">
-              {["WACR -vs- TCT"].map((option) => (
-                <button
-                  key={option}
-                  onClick={() => router.push("/" + option.toLowerCase().replace(/\s+/g, "_"))}
-                  className={`px-4 py-1 rounded-full border text-sm ${
-                    selectedPlotOptions.includes(option)
-                      ? "bg-[#4A6EA9] text-white"
-                      : "bg-[#FFF5EE] text-gray-700"
-                  } hover:bg-gray-50`}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>}
-          </div>
+          {testData.genomes["DNA_Corpus"].checked && (
+            <div className="flex flex-wrap items-center gap-4">
+              <span className="text-[#8B4513] font-medium">
+                Scatterplot (Space-Time Tradeoff)
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {["WACR -vs- TCT"].map((option) => (
+                  <button
+                    key={option}
+                    onClick={() =>
+                      router.push(
+                        "/" + option.toLowerCase().replace(/\s+/g, "_")
+                      )
+                    }
+                    className={`px-4 py-1 rounded-full border text-sm ${
+                      selectedPlotOptions.includes(option)
+                        ? "bg-[#4A6EA9] text-white"
+                        : "bg-[#FFF5EE] text-gray-700"
+                    } hover:bg-gray-50`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
