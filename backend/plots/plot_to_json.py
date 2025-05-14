@@ -44,7 +44,7 @@ DATA_TO_METRIC_MAP = {
     "tdt": "total decompression time",
     "tdm": "total decompression memory",
     "pdm": "peak decompression memory",
-    "pdc": "peak decompression cpu usage"
+    # "pdc": "peak decompression cpu usage"
 }
 
 METRIC_COLOR_MAP = {
