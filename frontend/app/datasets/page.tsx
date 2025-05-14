@@ -3,6 +3,7 @@
 import React from "react";
 import { Header } from "../../components/header";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function DatasetsPage() {
   const datasetLinks = [
@@ -84,6 +85,11 @@ export default function DatasetsPage() {
               </a>.
             </p> */}
           </motion.div>
+          <div className="mt-8 text-center">
+              <Link href="/" className="text-sm text-[#4A6EA9] hover:underline">
+                ← Back to Home
+              </Link>
+            </div>
         </div>
       </motion.main>
     </div>

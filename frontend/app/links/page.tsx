@@ -3,6 +3,7 @@
 import React from "react";
 import { Header } from "../../components/header";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function LinksPage() {
     const compressionLinks = [
@@ -67,6 +68,11 @@ export default function LinksPage() {
                 ))}
               </div>
             </motion.div>
+            <div className="mt-8 text-center">
+              <Link href="/" className="text-sm text-[#4A6EA9] hover:underline">
+                ← Back to Home
+              </Link>
+            </div>
           </div>
         </motion.main>
       </div>
