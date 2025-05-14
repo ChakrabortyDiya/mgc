@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import axios from "axios";
 import Loader from "../../components/ui/loader";
 import { useGlobalContext } from "../../components/GlobalContext";
+import { motion } from "framer-motion";
 
 export default function VisualizationPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -99,15 +100,28 @@ export default function VisualizationPage() {
   }, [selectedChartOptions]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-white"
+    >
       {isLoading && <Loader />}
       <Header />
-      <main className="container mx-auto px-4 py-8">
-        <div
+      <motion.main 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="container mx-auto px-4 py-8"
+      >
+        <motion.div
           ref={chartContainerRef}
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
           dangerouslySetInnerHTML={{ __html: selectedChartOptions }}
         />
-      </main>
-    </div>
+      </motion.main>
+    </motion.div>
   );
 }

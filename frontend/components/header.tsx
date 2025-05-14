@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 export function Header() {
   const links = [
+    {name: 'Home', path: '/'},
     {name: 'About', path: '/about'},
     { name: 'Algorithms', path: '/algo' },
     { name: 'Datasets', path: '/datasets' },

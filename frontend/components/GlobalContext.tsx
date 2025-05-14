@@ -7,6 +7,7 @@ import React, {
   useEffect,
 } from "react";
 import Loader from "./ui/loader";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface GlobalContextProps {
   count: number;
@@ -50,7 +51,29 @@ export const GlobalContextProvider = ({ children }: { children: ReactNode }) => 
         setSelectedGenomeType,
       }}
     >
-      {globalLoading ? <Loader /> : children}
+      <AnimatePresence mode="wait">
+        {globalLoading ? (
+          <motion.div
+            key="loader"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Loader />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="content"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </GlobalContext.Provider>
   );
 };
