@@ -5,9 +5,13 @@ import { Header } from "../../components/header";
 import { useParams } from "next/navigation";
 import axios from "axios";
 import Loader from "../../components/ui/loader";
+import { useGlobalContext } from "../../components/GlobalContext";
+import { motion } from "framer-motion";
+
 export default function VisualizationPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { option } = useParams();
+  const { selectedGenomeType } = useGlobalContext();
 
   const [selectedChartOptions, setSelectedChartOptions] = useState<string>("");
   const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -15,6 +19,7 @@ export default function VisualizationPage() {
   const generateGraphData = async (option: string) => {
     try {
       console.log("Generating graph data for option:", option);
+      console.log("Selected genome type:", selectedGenomeType);
       
       const response =
         option === "wacr -vs- total decompression time"
@@ -23,7 +28,11 @@ export default function VisualizationPage() {
             )
           : await axios.post(
               `${process.env.NEXT_PUBLIC_SERVER_LINK}/dashboard/chart/barchart`,
-              { name: option?.toLowerCase() || "" }
+              { 
+                name: option?.toLowerCase() || "",
+                genomeType: selectedGenomeType.toLowerCase()
+
+              }
             );
       if (response.status !== 200) throw new Error("Failed to fetch data");
       setSelectedChartOptions(response.data);
@@ -91,15 +100,28 @@ export default function VisualizationPage() {
   }, [selectedChartOptions]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-white"
+    >
       {isLoading && <Loader />}
       <Header />
-      <main className="container mx-auto px-4 py-8">
-        <div
+      <motion.main 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="container mx-auto px-4 py-8"
+      >
+        <motion.div
           ref={chartContainerRef}
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
           dangerouslySetInnerHTML={{ __html: selectedChartOptions }}
         />
-      </main>
-    </div>
+      </motion.main>
+    </motion.div>
   );
 }

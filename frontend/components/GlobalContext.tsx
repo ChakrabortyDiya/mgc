@@ -7,6 +7,7 @@ import React, {
   useEffect,
 } from "react";
 import Loader from "./ui/loader";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface GlobalContextProps {
   count: number;
@@ -14,23 +15,25 @@ interface GlobalContextProps {
   comparisonRecords: any[];
   setComparisonRecords: React.Dispatch<React.SetStateAction<any[]>>;
   setGlobalLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedGenomeType: string;
+  setSelectedGenomeType: React.Dispatch<React.SetStateAction<string>>;
 }
-export const GlobalContext = createContext<GlobalContextProps>({
+
+const GlobalContext = createContext<GlobalContextProps>({
   count: 0,
   setCount: () => {},
   comparisonRecords: [],
   setComparisonRecords: () => {},
   setGlobalLoading: () => {},
+  selectedGenomeType: "DNA_Corpus",
+  setSelectedGenomeType: () => {},
 });
 
-export const useGlobalContext = () => {
-  return useContext(GlobalContext);
-};
-
-export const GlobalProvider = ({ children }: { children: ReactNode }) => {
+export const GlobalContextProvider = ({ children }: { children: ReactNode }) => {
   const [count, setCount] = useState(0);
   const [comparisonRecords, setComparisonRecords] = useState<any[]>([]);
-  const [globalLoading, setGlobalLoading] = useState(false);
+  const [globalLoading, setGlobalLoading] = useState<boolean>(false);
+  const [selectedGenomeType, setSelectedGenomeType] = useState<string>("DNA_Corpus");
 
   useEffect(() => {
     console.log("Global Loading State:", globalLoading);
@@ -44,9 +47,35 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
         comparisonRecords,
         setComparisonRecords,
         setGlobalLoading,
+        selectedGenomeType,
+        setSelectedGenomeType,
       }}
     >
-      {globalLoading ? <Loader /> : children}
+      <AnimatePresence mode="wait">
+        {globalLoading ? (
+          <motion.div
+            key="loader"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Loader />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="content"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </GlobalContext.Provider>
   );
 };
+
+export const useGlobalContext = () => useContext(GlobalContext);

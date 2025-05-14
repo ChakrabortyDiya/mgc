@@ -4,12 +4,29 @@
 
 import { Label } from "@/components/ui/label"
 /*import { Checkbox } from "@/components/ui/checkbox"*/
+import { useGlobalContext } from "./GlobalContext"
+import { useEffect } from "react"
 
 // type OutputConfigurationProps = {
 //   selectedGenomes: string[]
 // }
 
 export function OutputConfiguration({selectedMetrics, setSelectedMetrics}: {selectedMetrics: string[], setSelectedMetrics: React.Dispatch<React.SetStateAction<string[]>>}) {
+  const { selectedGenomeType } = useGlobalContext();
+  
+  // Filter out TCT and TDT metrics when DNA Corpus 2 is selected
+  useEffect(() => {
+    if (selectedGenomeType === "DNA") {
+      // Remove TCT and TDT from selected metrics if they exist
+      setSelectedMetrics(prev => prev.filter(metric => metric !== "TCT" && metric !== "TDT"));
+    }
+  }, [selectedGenomeType, setSelectedMetrics]);
+
+  // Determine which metrics to display based on selected genome type
+  const availableMetrics = selectedGenomeType === "DNA" 
+    ? ["Compression Size"] // Only show Compression Size for DNA Corpus 2
+    : ["Compression Size", "TCT", "TDT"]; // Show all metrics for DNA Corpus 1
+
   // const handleDisplayTableClick = () => {
   //   console.log("Selected Genomes:", selectedGenomes)
   // }
@@ -30,15 +47,7 @@ export function OutputConfiguration({selectedMetrics, setSelectedMetrics}: {sele
           <div className="space-y-2">
             <Label>Metrics:</Label>
             <div className="flex flex-col space-y-2">
-              {[
-              "Compression Size",
-              "TCT",
-              // "Peak Compression Memory",
-              // "Compression CPU Usage",
-              "TDT",
-              // "Peak Decompression Memory",
-              // "Decompression CPU Usage",
-              ].map((column) => (
+              {availableMetrics.map((column) => (
               <label key={column} className="flex items-center space-x-2">
                 <input
                 type="checkbox"
