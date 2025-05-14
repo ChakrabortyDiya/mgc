@@ -190,7 +190,7 @@ export function QuickSelector() {
                 ([size, data]: [
                   string,
                   { size: string; checked: boolean }
-                ], index) => (
+                ]) => (
                   <motion.label 
                     key={size} 
                     className="inline-flex items-center"
