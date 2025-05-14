@@ -1,5 +1,6 @@
 import logging
 from pymongo.collection import Collection
+from utils import TableData
 
 # Configure logging if not already configured
 logging.basicConfig(level=logging.INFO)
@@ -8,21 +9,32 @@ logging.basicConfig(level=logging.INFO)
 METRIC_MAP = {
     "wacr": "compression_ratio",
     "compression size": "compressed_size",
-    "total compression time": "compression_time",
-    "peak compression memory": "compression_memory",
-    "total compression memory": "compression_memory",
-    "peak compression cpu usage": "compression_cpu",
-    "total compression cpu usage": "compression_cpu",
-    "total decompression time": "decompression_time",
-    "peak decompression memory": "decompression_memory",
-    "total decompression memory": "decompression_memory",
-    "peak decompression cpu usage": "decompression_cpu",
-    "total decompression cpu usage": "decompression_cpu",
+    "tct": "compression_time",
+    "pcm": "compression_memory",
+    "tcm": "compression_memory",
+    "pcc": "compression_cpu",
+    "tcc": "compression_cpu",
+    "tdt": "decompression_time",
+    "pdm": "decompression_memory",
+    "tdm": "decompression_memory",
+    "pdc": "decompression_cpu",
+    "tdc": "decompression_cpu",
+}
+
+RESULT_METRIC_MAP = {
+    "compression_ratio": "WACR",
+    "compressed_size": "Compression Size",
+    "compression_time": "TCT (s)",
+    "compression_memory": "PCM (MB)",
+    "decompression_time": "TDT (s)",
+    "decompression_memory": "PDM (MB)",
+    "compression_cpu": "PCC (%)",
+    "decompression_cpu": "PDC (%)",
 }
 
 class DashboardService:
     @staticmethod
-    def fetch_grouped_results(collection: Collection, input_data) -> list:
+    def fetch_grouped_results(collection: Collection, input_data: TableData) -> list:
         """
         Fetches grouped results from a MongoDB collection based on input_data.
         Expects input_data to have:
@@ -42,22 +54,39 @@ class DashboardService:
         except Exception as e:
             logging.error("Error processing comp_type mapping: %s", e, exc_info=True)
             return results  # Return empty results or re-raise exception if needed
-
-        # Loop over each dataset.
+        
+        metrices = []
+        
+        for metric in input_data.metric:
+            # Normalize metric names.
+            metric_key = metric.lower().strip()
+            if metric_key not in METRIC_MAP:
+                logging.warning("Metric '%s' is not recognized. Skipping.", metric)
+                continue
+            metric = METRIC_MAP[metric_key]
+            metrices.append(metric)
+            logging.info("Normalized metric '%s' to '%s'", metric_key, metric)
+        
+        logging.info("Metrics to be processed: %s", metrices)
+        # Loop over each dataset.   
         for dataset_id in input_data.id:
             # Process standard compressors.
             if "standard" in selected_types:
                 for comp_name in input_data.standard_comp_name:
                     if comp_name:  # Skip if None or empty string.
+                        if comp_name == "7zip":
+                            comp_name = "7-zip"
                         DashboardService._process_query(
-                            collection, dataset_id, comp_name, "standard", input_data.metric, results
+                            collection, dataset_id, comp_name, "standard", metrices, results
                         )
             # Process proposed compressors.
             if "proposed" in selected_types:
                 for comp_name in input_data.proposed_comp_name:
                     if comp_name:
+                        if comp_name == "7zip":
+                            comp_name = "7-zip"
                         DashboardService._process_query(
-                            collection, dataset_id, comp_name, "proposed", input_data.metric, results
+                            collection, dataset_id, comp_name, "proposed", metrices, results
                         )
 
         return results
@@ -71,6 +100,7 @@ class DashboardService:
                 "compressor": comp_name,
                 "compressor_type": comp_type_str
             }
+            logging.info("Querying MongoDB with filter: %s", query_filter)
             # Fetch matching documents.
             docs = list(collection.find(query_filter))
         except Exception as e:
@@ -84,16 +114,19 @@ class DashboardService:
             return
 
         result_dict = {
-            "dataset_id": dataset_id,
-            "compressor": comp_name,
-            "compressor_type": comp_type_str
+            "Dataset ID": dataset_id,
+            "Compressor": comp_name,
+            "Compressor Type": comp_type_str
         }
 
         for metric in metrics:
             try:
                 # Normalize the metric key.
-                metric_key = metric.lower().strip()
-                db_field = METRIC_MAP.get(metric_key)
+                # metric_key = metric.lower().strip()
+                # # db_field = METRIC_MAP.get(metric_key)
+                # db_field = METRIC_MAP[metric_key]
+                db_field = metric.lower().strip()
+                logging.info("DB field for metric '%s': %s", metric, db_field)
                 if not db_field:
                     result_dict[metric] = None
                     continue
@@ -102,124 +135,16 @@ class DashboardService:
                 values = [doc.get(db_field, 0) for doc in docs if doc.get(db_field) is not None]
                 if not values:
                     result_dict[metric] = None
-                elif "peak" in metric_key:
-                    result_dict[metric] = max(values)
-                elif "total" in metric_key:
-                    result_dict[metric] = sum(values)
+                # elif "p" in db_field:
+                #     result_dict[metric] = max(values)
+                # elif "t" in db_field:
+                #     result_dict[metric] = sum(values)
                 else:
                     # Fallback: take the first document's value.
-                    result_dict[metric] = values[0]
+                    result_dict[RESULT_METRIC_MAP[metric]] = values[0]
             except Exception as e:
                 logging.error("Error processing metric '%s' for dataset_id %s, compressor %s: %s",
                               metric, dataset_id, comp_name, e, exc_info=True)
                 result_dict[metric] = None
 
         results.append(result_dict)
-
-
-
-# import logging
-# from sqlalchemy.orm import Session
-# from database.models import ResultComparison
-# from sqlalchemy import and_
-
-# # Configure logging if not already configured
-# logging.basicConfig(level=logging.INFO)
-
-# # Mapping for new metric names to DB columns
-# METRIC_MAP = {
-#     "wacr": "compression_ratio",
-#     "compression size": "compressed_size",
-#     "total compression time": "compression_time",
-#     "peak compression memory": "compression_memory",
-#     "total compression memory": "compression_memory",
-#     "peak compression cpu usage": "compression_cpu",
-#     "total compression cpu usage": "compression_cpu",
-#     "total decompression time": "decompression_time",
-#     "peak decompression memory": "decompression_memory",
-#     "total decompression memory": "decompression_memory",
-#     "peak decompression cpu usage": "decompression_cpu",
-#     "total decompression cpu usage": "decompression_cpu",
-# }
-
-# class DashboardService:
-#     @staticmethod
-#     def fetch_grouped_results(db: Session, input_data):
-#         results = []
-
-#         try:
-#             # Map comp_type list index to type string
-#             comp_type_map = {0: "standard", 1: "proposed"}
-#             selected_types = [comp_type_map[i]
-#                               for i, flag in enumerate(input_data.comp_type) if flag == 1]
-#         except Exception as e:
-#             logging.error("Error processing comp_type mapping: %s", e, exc_info=True)
-#             return results  # Return empty results or re-raise exception if needed
-
-#         for dataset_id in input_data.id:
-#             # Handle standard compressors
-#             if "standard" in selected_types:
-#                 for comp_name in input_data.standard_comp_name:
-#                     if comp_name:  # skip if None or empty string
-#                         DashboardService._process_query(
-#                             db, dataset_id, comp_name, "standard", input_data.metric, results
-#                         )
-
-#             # Handle proposed compressors
-#             if "proposed" in selected_types:
-#                 for comp_name in input_data.proposed_comp_name:
-#                     if comp_name:
-#                         DashboardService._process_query(
-#                             db, dataset_id, comp_name, "proposed", input_data.metric, results
-#                         )
-
-#         return results
-
-#     @staticmethod
-#     def _process_query(db, dataset_id, comp_name, comp_type_str, metrics, results):
-#         try:
-#             query = db.query(ResultComparison).filter(
-#                 and_(
-#                     ResultComparison.dataset_id == dataset_id,
-#                     ResultComparison.compressor == comp_name,
-#                     ResultComparison.compressor_type == comp_type_str
-#                 )
-#             ).all()
-#         except Exception as e:
-#             logging.error("Database query failed for dataset_id %s, compressor %s, type %s: %s",
-#                           dataset_id, comp_name, comp_type_str, e, exc_info=True)
-#             return
-
-#         if not query:
-#             logging.info("No results found for dataset_id %s, compressor %s, type %s",
-#                          dataset_id, comp_name, comp_type_str)
-#             return
-
-#         result_dict = {
-#             "dataset_id": dataset_id,
-#             "compressor": comp_name,
-#             "compressor_type": comp_type_str
-#         }
-
-#         for metric in metrics:
-#             try:
-#                 metric_key = metric.lower().strip()
-#                 db_col = METRIC_MAP.get(metric_key)
-#                 if not db_col:
-#                     result_dict[metric] = None
-#                     continue
-
-#                 if "peak" in metric_key:
-#                     value = max(getattr(row, db_col, 0) for row in query)
-#                 elif "total" in metric_key:
-#                     value = sum(getattr(row, db_col, 0) for row in query)
-#                 else:
-#                     # fallback: take the first row's value
-#                     value = getattr(query[0], db_col, 0)
-#                 result_dict[metric] = value
-#             except Exception as e:
-#                 logging.error("Error processing metric '%s' for dataset_id %s, compressor %s: %s",
-#                               metric, dataset_id, comp_name, e, exc_info=True)
-#                 result_dict[metric] = None
-
-#         results.append(result_dict)

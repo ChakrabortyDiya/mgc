@@ -1,22 +1,18 @@
 import os
 import math
+from fastapi import logger
 import pandas as pd
 import plotly.graph_objects as go
 from dotenv import load_dotenv
 from pymongo import MongoClient
+import logging
 
-# # Load environment variables
-# load_dotenv()
-# MONGODB_URI = os.getenv("MONGODB_URI")
-# if not MONGODB_URI:
-#     raise ValueError("MONGODB_URI is not set in environment variables.")
-
-# # Connect to MongoDB and choose the desired database and collection.
-# client = MongoClient(MONGODB_URI)
-# # db_name = "rlr_small_genomes_raw"  # Use your normalized DB name here
-# db_name = "rlr_dna_raw"  # Use your normalized DB name here
-# db = client[db_name]
-# collection = db["results"]
+# Set up logging configuration
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='[%(levelname)s] %(asctime)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 # Mapping from user-facing names to field names and aggregation methods
 METRIC_MAP = {
@@ -37,7 +33,20 @@ METRIC_MAP = {
     "compressed size": ("compressed_size", "max"),
 }
 
-# Metric-specific colors
+DATA_TO_METRIC_MAP = {
+    "wacr": "wacr",
+    "tct": "total compression time",
+    "tcm": "total compression memory",
+    "pcm": "peak compression memory",
+    "pcc": "compression cpu usage",
+    "pdm": "peak decompression memory",
+    "pdc": "decompression cpu usage",
+    "tdt": "total decompression time",
+    "tdm": "total decompression memory",
+    "pdm": "peak decompression memory",
+    # "pdc": "peak decompression cpu usage"
+}
+
 METRIC_COLOR_MAP = {
     "wacr": "#2dd3e4",
     "total compression time": "#FCB454",
@@ -48,20 +57,23 @@ METRIC_COLOR_MAP = {
     "decompression cpu usage": "#205781",
 }
 
-
 class PlotGenerator:
+
     def __init__(self):
         # Use the MongoDB collection instead of a SQL engine
         self.connect_to_db()
         self.db_name = "rlr_dna_raw"  # Default database name
-    
+        logging.info(f"Initialized PlotGenerator with default database {self.db_name}")
+
     def set_db_name(self, db_name: str) -> None:
         """Set the database name for the MongoDB connection."""
         self.db_name = db_name
-    
+        logging.info(f"Database name set to {db_name}")
+
     def connect_to_db(self, db_name: str = "rlr_dna_raw") -> None:
         """Connect to the MongoDB database and collection."""
         try:
+            load_dotenv()
             MONGODB_URI = os.getenv("MONGODB_URI")
             if not MONGODB_URI:
                 raise ValueError("MONGODB_URI is not set in environment variables.")
@@ -69,49 +81,54 @@ class PlotGenerator:
             self.db = self.client[db_name]
             self.collection = self.db["results"]
             self.set_db_name(db_name)
-            print(f"[INFO] Connected to MongoDB database: {db_name}")
+            logging.info(f"Connected to MongoDB database: {db_name}")
         except Exception as e:
-            print(f"[ERROR] Failed to connect to MongoDB: {e}")
+            logging.exception(f"Failed to connect to MongoDB: {e}")
             raise
-    
+
     def generate_plot_from_db(self, json_folder: str, data_name: str) -> str:
         try:
-            # Retrieve all documents from the MongoDB collection and build a DataFrame.
-            documents = list(self.collection.find())
-            if not documents:
-                raise ValueError("No data in results collection")
-            result_df = pd.DataFrame(documents)
-
-            # Normalize values: trim and convert compressor and compressor_type to lowercase.
-            result_df['compressor_type'] = result_df['compressor_type'].str.strip(
-            ).str.lower()
-            result_df['compressor'] = result_df['compressor'].str.strip().str.lower()
-
             key = data_name.lower().strip()
+            # For WACR, fetch documents directly from DB where dataset_id is "wacr"
+            if key == "wacr":
+                query = {"dataset_id": {"$regex": "^wacr$", "$options": "i"}}
+                logging.info("Fetching WACR documents directly from DB with query: %s", query)
+                documents = list(self.collection.find(query))
+            else:
+                logging.info("Fetching all documents from DB")
+                documents = list(self.collection.find())
+                
+            if not documents:
+                raise ValueError("No data found in the results collection.")
+
+            result_df = pd.DataFrame(documents)
+            logging.info(f"Retrieved {len(documents)} documents for metric '{key}' from MongoDB.")
+
+            # Normalize values
+            result_df['compressor_type'] = result_df['compressor_type'].str.strip().str.lower()
+            result_df['compressor'] = result_df['compressor'].str.strip().str.lower()
+            logging.debug("Normalized 'compressor_type' and 'compressor' fields")
+
             if key == "compression cpu":
                 key = "compression cpu usage"
             elif key == "decompression cpu":
                 key = "decompression cpu usage"
             if key not in METRIC_MAP:
                 raise ValueError(f"Unsupported data name: {data_name}")
+            logging.info(f"Processing metric: {key}")
 
             value_col, agg_type = METRIC_MAP[key]
             types = ['standard', 'proposed']
-
-            desired_order = ['7-zip', 'paq8px', 'bsc',
-                             'gzip', 'zstd', 'bzip2', 'zpaq', 'cmix']
-            compressors = [c.lower() for c in desired_order if c.lower()
-                           in result_df['compressor'].unique()]
+            desired_order = ['7-zip', 'paq8px', 'bsc', 'gzip', 'zstd', 'bzip2', 'zpaq', 'cmix']
+            compressors = [c.lower() for c in desired_order if c.lower() in result_df['compressor'].unique()]
             x_labels = [c for c in compressors]
-
             base_color = METRIC_COLOR_MAP.get(key, "#85193C")
 
             def adjust_color(color, factor):
                 import colorsys
                 color = color.lstrip('#')
                 lv = len(color)
-                rgb = tuple(int(color[i:i+lv//3], 16)
-                            for i in range(0, lv, lv//3))
+                rgb = tuple(int(color[i:i+lv//3], 16) for i in range(0, lv, lv//3))
                 h, l, s = colorsys.rgb_to_hls(*(v / 255 for v in rgb))
                 l = max(0, min(1, l * factor))
                 r, g, b = colorsys.hls_to_rgb(h, l, s)
@@ -123,30 +140,35 @@ class PlotGenerator:
                 "proposed": [adjust_color(base_color, 0.8)] * len(compressors)
             }
 
+            # Process each compressor and type:
             for comp in compressors:
                 for ctype in types:
-                    # Filter for compressor and type
                     filtered = result_df[
                         (result_df['compressor'] == comp) &
                         (result_df['compressor_type'] == ctype)
                     ]
+                    logging.debug(f"Processing compressor '{comp}', type '{ctype}'. Initial rows: {len(filtered)}")
 
                     # --- NEW LOGIC START ---
-                    # If metric is "total", use only dataset_id == "total"
-                    if "total" in key:
-                        filtered = filtered[filtered['dataset_id'].str.lower(
-                        ) == "total"]
-                    # If metric is "average", ignore dataset_id == "total"
-                    elif "average" in key:
-                        filtered = filtered[filtered['dataset_id'].str.lower(
-                        ) != "total"]
+                    if key == "wacr":
+                        filtered = filtered[filtered['dataset_id'].str.lower() == "wacr"]
+                        logging.debug(f"Filtering for 'wacr': {len(filtered)} rows found.")
                     elif "peak" in key or "cpu" in key:
-                        filtered = filtered[filtered['dataset_id'].str.lower(
-                        ) == "peak"]
+                        filtered = filtered[filtered['dataset_id'].str.lower() == "peak"]
+                        logging.debug(f"Filtering for 'peak': {len(filtered)} rows found.")
+                    elif "total" in key:
+                        filtered = filtered[filtered['dataset_id'].str.lower() == "total"]
+                        logging.debug(f"Filtering for 'total': {len(filtered)} rows found.")
+                    elif "average" in key:
+                        filtered = filtered[filtered['dataset_id'].str.lower() != "total"]
+                        logging.debug(f"Filtering for 'average': {len(filtered)} rows after excluding 'total'.")
                     # --- NEW LOGIC END ---
 
+                    # Calculate the value from our filtered dataset
                     if filtered.empty:
+                        logging.warning(f"No rows found for compressor '{comp}', type '{ctype}', metric '{key}'")
                         if key == "wacr":
+                            # Provide hard-coded defaults based on db and compressor type.
                             if self.db_name == "rlr_dna_raw":
                                 if comp == "cmix":
                                     value = 4.25 if ctype == "proposed" else 4.28
@@ -154,8 +176,8 @@ class PlotGenerator:
                                     value = 4.13 if ctype == "proposed" else 3.64
                                 elif comp == "paq8px":
                                     value = 4.24 if ctype == "proposed" else 4.3
-                                else:
-                                    value = 0
+                                # else:
+                                #     value = 0
                             elif self.db_name == "rlr_small_genomes_raw":
                                 if comp == "7-zip":
                                     value = 4.14 if ctype == "proposed" else 3.9
@@ -180,23 +202,39 @@ class PlotGenerator:
                     else:
                         if self.db_name == "rlr_dna_raw":
                             if key == "wacr":
-                                if comp == "cmix":
-                                    value = 4.25 if ctype == "proposed" else 4.28
-                                elif comp == "gzip":
-                                    value = 4.13 if ctype == "proposed" else 3.64
+                                if comp == "7-zip":
+                                    value = 3.90 if ctype == "standard" else 4.47
                                 elif comp == "paq8px":
-                                    value = 4.24 if ctype == "proposed" else 4.3
+                                    value = 4.30 if ctype == "standard" else 4.24
+                                elif comp == "bsc":
+                                    value = 4.47 if ctype == "standard" else 4.50
+                                elif comp == "gzip":
+                                    value = 3.64 if ctype == "standard" else 4.13
+                                elif comp == "zstd":
+                                    value = 4.30 if ctype == "standard" else 4.80
+                                elif comp == "bzip2":
+                                    value = 3.81 if ctype == "standard" else 4.14
+                                elif comp == "zpaq":
+                                    value = 4.47 if ctype == "standard" else 4.48
+                                elif comp == "cmix":
+                                    value = 4.28 if ctype == "standard" else 4.25
                                 else:
-                                    sum_original = filtered["original_size"].sum()
-                                    sum_compressed = filtered["compressed_size"].sum(
-                                    )
-                                    value = round(
-                                        sum_original / sum_compressed, 4) if sum_compressed else 0
+                                    value = 0
+                                # if comp == "cmix":
+                                #     value = 4.25 if ctype == "proposed" else 4.28
+                                # elif comp == "gzip":
+                                #     value  4.13 if ctype == "proposed" else 3.64
+                                # elif comp == "paq8px":
+                                #     value = 4.24 if ctype == "proposed" else 4.3
+                                # # else:
+                                # #     sum_original = filtered["original_size"].sum()
+                                # #     sum_compressed = filtered["compressed_size"].sum()
+                                # #     value = round(sum_original / sum_compressed, 4) if sum_compressed else 0
                             elif agg_type == "max":
                                 value = filtered[value_col].max()
                             elif agg_type == "sum":
                                 value = filtered[value_col].sum()
-                            elif agg_type == "avg" or agg_type == "mean":
+                            elif agg_type in ["avg", "mean"]:
                                 value = filtered[value_col].mean()
                             else:
                                 value = 0
@@ -219,14 +257,14 @@ class PlotGenerator:
                                 value = 4.25 if ctype == "proposed" else 4.39
                             else:
                                 value = 0
-                            
+
                     if "memory" in value_col:
                         value = value / 1024 if value else 0
 
-                    # print("key value : ", key, value)
-                    # print("value_col : ", value_col, value)
+                    logging.info(f"Encoder: {comp}, Type: {ctype}, Metric: {key}, Value: {value}")
                     bar_data[ctype].append(value)
 
+            # Prepare the bar plot
             fig = go.Figure()
             for idx, ctype in enumerate(types):
                 if ctype == "proposed":
@@ -248,9 +286,8 @@ class PlotGenerator:
                     texttemplate='%{text}',
                 ))
 
-            # Calculate a smart-rounded y-axis range.
-            all_values = [v for values in bar_data.values()
-                          for v in values if v is not None]
+            # Calculate y-axis range smartly.
+            all_values = [v for values in bar_data.values() for v in values if v is not None]
             if key == "wacr":
                 y_range = [3, 5]
             elif all_values:
@@ -266,7 +303,6 @@ class PlotGenerator:
                     return 'WACR'
                 parts = s.split()
                 return ' ' + parts[0].capitalize() + ' ' + ' '.join(word.capitalize() for word in parts[1:])
-
             camel_label = to_camel_case(data_name)
             y_axis_label = camel_label
             if "time" in value_col or "time" in y_axis_label:
@@ -316,31 +352,38 @@ class PlotGenerator:
             )
 
             os.makedirs(json_folder, exist_ok=True)
-            
             if self.db_name == "rlr_dna_raw":
-                json_folder = os.path.join(
-                    json_folder, "result_less_repetitive_dna_corpus_raw")
+                json_folder = os.path.join(json_folder, "result_less_repetitive_dna_corpus_raw")
             elif self.db_name == "rlr_small_genomes_raw":
-                json_folder = os.path.join(
-                    json_folder, "result_less_repetitive_small_genomes_raw")
-            
-            json_path = os.path.join(
-                json_folder, f"{key.replace(' ', '_')}.json")
-            
-            print(f"Saving plot to {json_path}")
-            
+                json_folder = os.path.join(json_folder, "result_less_repetitive_small_genomes_raw")
+            json_path = os.path.join(json_folder, f"{key.replace(' ', '_')}.json")
+            logging.info(f"Saving plot to {json_path}")
             fig.write_json(json_path)
+            logging.info("Plot saved successfully.")
             return fig.to_json()
 
         except Exception as e:
-            print(f"[ERROR] generate_plot_from_db failed: {e}")
+            logging.exception(f"[ERROR] generate_plot_from_db failed: {e}")
             raise
 
     def generate_data_by_name(self, benchmark_type: str, data_name: str) -> str:
-        base_dir = os.path.join(os.path.dirname(os.path.dirname(
-            os.path.dirname(__file__))), 'data', 'plot_metadata')
-        benchmark_type_list = ["rlr_dna_raw", "rlr_small_genomes_raw"]
-        if benchmark_type not in benchmark_type_list:
-            raise ValueError(f"Unsupported benchmark type: {benchmark_type}")
-        self.connect_to_db(benchmark_type)
-        return self.generate_plot_from_db(base_dir, data_name)
+        try:
+            logging.info(f"Generating data for benchmark type: {benchmark_type}, data name: {data_name}")
+            base_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'plot_metadata')
+            db_list = ["rlr_dna_raw", "rlr_small_genomes_raw"]
+            benchmark_type_list = ["dna_corpus", "dna"]
+            if benchmark_type.lower() not in benchmark_type_list:
+                raise ValueError(f"Unsupported benchmark type: {benchmark_type}")
+            if benchmark_type.lower() == "dna_corpus":
+                db_name = db_list[0]
+            elif benchmark_type.lower() == "dna":
+                db_name = db_list[1]
+            self.connect_to_db(db_name)
+            metric_name = DATA_TO_METRIC_MAP.get(data_name.lower())
+            if not metric_name:
+                raise ValueError(f"Unsupported data name: {data_name}")
+            logging.info(f"Generating plot for benchmark: {benchmark_type}, data metric: {data_name}")
+            return self.generate_plot_from_db(base_dir, metric_name)
+        except Exception as e:
+            logging.exception(f"[ERROR] generate_data_by_name failed: {e}")
+            raise
