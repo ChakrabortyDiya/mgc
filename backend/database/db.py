@@ -29,10 +29,10 @@ if not MONGODB_URI:
 client = MongoClient(MONGODB_URI)
 
 # Define the two databases based on your requirements.
-db_dna = client["result_less_repetitive_dna_corpus_raw"]
-db_small_genomes = client["result_less_repetitive_small_genomes_raw"]
+db_dna = client["rlr_dna_raw"]
+db_small_genomes = client["rlr_small_genomes_raw"]
 
 # Optionally, you can print confirmation:
 print("Connected to MongoDB and configured databases:")
-print(" - result_less_repetitive_dna_corpus_raw")
-print(" - result_less_repetitive_small_genomes_raw")
+print(" - rlr_dna_raw")
+print(" - rlr_small_genomes_raw")
