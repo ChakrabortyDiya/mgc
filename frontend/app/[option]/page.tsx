@@ -22,7 +22,7 @@ export default function VisualizationPage() {
       console.log("Selected genome type:", selectedGenomeType);
       
       const response =
-        option === "wacr -vs- total decompression time"
+        option === "wacr -vs- tct"
           ? await axios.post(
               `${process.env.NEXT_PUBLIC_SERVER_LINK}/dashboard/chart/scatterplot`
             )
