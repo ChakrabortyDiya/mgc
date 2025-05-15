@@ -102,7 +102,7 @@ export function CompressorSelector({
           </div>
 
           <div className={`flex-1 ${!compressorTypes.standard && "blur-sm"} `}>
-            <Label>Select standard compressor setting:</Label>
+            <Label>Select standard compressor:</Label>
             <select
               multiple
               className="w-full h-64 border rounded mt-2"
@@ -122,7 +122,7 @@ export function CompressorSelector({
           </div>
 
           <div className={`flex-1 ${!compressorTypes.proposed && "blur-sm"}`}>
-            <Label>Select proposed compressor setting:</Label>
+            <Label>Select proposed compressor:</Label>
             <select
               multiple
               className="w-full h-64 border rounded mt-2"

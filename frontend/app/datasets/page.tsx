@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export default function DatasetsPage() {
   const datasetLinks = [
-    { name: "DNA Corpus 1", url: "https://encode.su/threads/2105-DNA-Corpus" },
+    { name: "DNA Corpus 1", url: "https://doi.org/10.1007/978-3-319-98702-6_25" },
     { name: "DNA Corpus 2", url: "https://encode.su/threads/2105-DNA-Corpus" }
   ];
 
