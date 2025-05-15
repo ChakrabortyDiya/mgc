@@ -34,7 +34,7 @@ RESULT_METRIC_MAP = {
 
 class DashboardService:
     @staticmethod
-    def fetch_grouped_results(collection: Collection, input_data: TableData) -> list:
+    def fetch_grouped_results(collection: Collection, input_data: TableData) -> dict:
         """
         Fetches grouped results from a MongoDB collection based on input_data.
         Expects input_data to have:
@@ -108,7 +108,7 @@ class DashboardService:
                           dataset_id, comp_name, comp_type_str, e, exc_info=True)
             return
 
-        if not docs:
+        if not len(docs):
             logging.info("No results found for dataset_id %s, compressor %s, type %s",
                          dataset_id, comp_name, comp_type_str)
             return
