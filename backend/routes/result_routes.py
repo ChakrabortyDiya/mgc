@@ -25,7 +25,7 @@ scatterplot_generator = ScatterPlotGenerator()
 
 # Use the "results" collection from the DNA corpus database.
 results_collection_dna = db_dna["results"]
-result_collection_genome = db_small_genomes["results"]
+results_collection_genome = db_small_genomes["results"]
 
 @router.get("/dashboard/test")
 def test_api():
@@ -37,12 +37,12 @@ def test_api():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/dashboard/data")
-def get_dashboard_data(data: TableData):
+def get_dashboard_data(data: TableData)->list:
     logger.info("[INFO] Fetching dashboard data...")
     logger.info(f"[INFO] Data: {data}")
     try:
         result_dna = DashboardService.fetch_grouped_results(results_collection_dna, data)
-        result_genome = DashboardService.fetch_grouped_results(result_collection_genome, data)
+        result_genome = DashboardService.fetch_grouped_results(results_collection_genome, data)
         combined = result_dna + result_genome
 
         # Create a dict with a composite key
@@ -50,7 +50,7 @@ def get_dashboard_data(data: TableData):
         #     f"{item['Dataset ID']}_{item['Compressor']}_{item['Compressor Type']}": item
         #     for item in combined
         # }
-        return result_dna
+        return combined
     except Exception as e:
         logger.error("Error in get_dashboard_data", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
