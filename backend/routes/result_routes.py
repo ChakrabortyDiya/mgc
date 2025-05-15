@@ -2,7 +2,7 @@ import logging
 import json
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import HTMLResponse
-from database.db import db_dna  # now using MongoDB databases from db.py
+from database.db import db_dna, db_small_genomes # now using MongoDB databases from db.py
 from utils import TableData, MetricsPlotData
 from services.result_service import DashboardService
 from plots.plot_to_json import PlotGenerator
@@ -24,7 +24,8 @@ plot_generator = PlotGenerator()
 scatterplot_generator = ScatterPlotGenerator()
 
 # Use the "results" collection from the DNA corpus database.
-results_collection = db_dna["results"]
+results_collection_dna = db_dna["results"]
+results_collection_genome = db_small_genomes["results"]
 
 @router.get("/dashboard/test")
 def test_api():
@@ -36,16 +37,20 @@ def test_api():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/dashboard/data")
-def get_dashboard_data(data: TableData):
-    """
-    Endpoint to fetch grouped dashboard data.
-    Uses MongoDB (results_collection) instead of a SQLAlchemy session.
-    """
+def get_dashboard_data(data: TableData)->list:
     logger.info("[INFO] Fetching dashboard data...")
     logger.info(f"[INFO] Data: {data}")
     try:
-        # Pass the MongoDB collection to the DashboardService.
-        return DashboardService.fetch_grouped_results(results_collection, data)
+        result_dna = DashboardService.fetch_grouped_results(results_collection_dna, data)
+        result_genome = DashboardService.fetch_grouped_results(results_collection_genome, data)
+        combined = result_dna + result_genome
+
+        # Create a dict with a composite key
+        # result_dict = {
+        #     f"{item['Dataset ID']}_{item['Compressor']}_{item['Compressor Type']}": item
+        #     for item in combined
+        # }
+        return combined
     except Exception as e:
         logger.error("Error in get_dashboard_data", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
