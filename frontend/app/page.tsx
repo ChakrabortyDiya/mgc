@@ -53,7 +53,7 @@ export default function Page() {
           variants={item}
           className="text-center text-sm text-gray-600 pt-8"
         >
-          By <a href="#" className="text-blue-600 hover:underline">Contributors</a>, 2023-2026, public domain
+          By <a href="/contributors" className="text-blue-600 hover:underline">Contributors</a>, 2023-2026, public domain
         </motion.footer>
       </motion.main>
     </motion.div>
