@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export function QuickSelector() {
   const router = useRouter();
   const { selectedGenomeType, setSelectedGenomeType, testData, setTestData } = useGlobalContext();
+  console.log(selectedGenomeType); 
 
   // const [testData, setTestData] = useState({
   //   genomes: {
@@ -115,7 +116,7 @@ export function QuickSelector() {
       setIsLoading(false);
     }
   };
-
+  console.log(fetchData);
   // const handleBarClick = (option: string, type: "barchart" | "scatterplot") => {
   //   fetchData(option, type);
   // };
