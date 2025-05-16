@@ -23,66 +23,11 @@ export default function ComparisonPage() {
   const [selectedStandard, setSelectedStandard] = useState<string[]>([]);
   const [selectedProposed, setSelectedProposed] = useState<string[]>([]);
 
-  const [selectedCompName, setSelectedCompName] = useState<string[]>([]);
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>([]);
-  const { setComparisonRecords, comparisonRecords, setGlobalLoading, testData } =
-    useGlobalContext();
-  const [downloadClicked, setDownloadClicked] = useState(false);
-  const router = useRouter();
-  useEffect(() => {
-    setSelectedCompName([
-      selectedStandard[0]?.length > 0 ? selectedStandard[0] : "",
-      selectedProposed[0]?.length > 0 ? selectedProposed[0] : "",
-    ]);
-  }, [selectedProposed, selectedStandard]);
+    const [selectedMetrics, setSelectedMetrics] = useState<string[]>([]);  const { setComparisonRecords, comparisonRecords, setGlobalLoading, testData } =    useGlobalContext();  const [downloadClicked, setDownloadClicked] = useState(false);  const router = useRouter();
 
-  const displayTable = async () => {
-    try {
-      const response = await axios.post(
-        process.env.NEXT_PUBLIC_SERVER_LINK+"/dashboard/data",
-        {
-          id: testData.genomes.DNA_Corpus.checked ? selectedGenomes.map((name) => name.split(" ")[0]) : selectedDatasets.map((name) => name.split(" ")[0]),
-          comp_type: [
-            compressorTypes.proposed ? 1 : 0,
-            compressorTypes.standard ? 1 : 0,
-          ].reverse(),
-          standard_comp_name: [selectedCompName.map((name) => name.split("-")[1])[0]],
-          proposed_comp_name: [selectedCompName.map((name) => name.split("-")[1])[1]],
-          metric: selectedMetrics,
-        }
-      );
-      setComparisonRecords(response.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+    const displayTable = async () => {    try {      const response = await axios.post(        process.env.NEXT_PUBLIC_SERVER_LINK+"/dashboard/data",        {          id: testData.genomes.DNA_Corpus.checked ? selectedGenomes.map((name) => name.split(" ")[0]) : selectedDatasets.map((name) => name.split(" ")[0]),          comp_type: [            compressorTypes.proposed ? 1 : 0,            compressorTypes.standard ? 1 : 0,          ].reverse(),          standard_comp_name: selectedStandard.map(name => name.split("-")[1]),          proposed_comp_name: selectedProposed.map(name => name.split("-")[1]),          metric: selectedMetrics,        }      );      setComparisonRecords(response.data);    } catch (error) {      console.error("Error fetching data:", error);    }  };
 
-  const handleDisplayTable = async () => {
-    console.log(
-      "Selected Genomes:",
-      selectedGenomes.map((name) => name.split(" ")[0])
-    );
-    console.log(
-      "Selected Datasets:",
-      selectedDatasets.map((name) => name.split(" ")[0])
-    );
-    console.log(
-      "Compressor Types:",
-      [
-        compressorTypes.proposed ? 1 : 0,
-        compressorTypes.standard ? 1 : 0,
-      ].reverse()
-    );
-    const splitSecondElements = selectedCompName.map(
-      (name) => name.split("-")[1]
-    );
-    console.log("Effective Selected Comp Name:", splitSecondElements);
-    console.log("Selected Standard:", selectedMetrics);
-    setGlobalLoading(true);
-    await displayTable();
-    setGlobalLoading(false);
-    router.push("/table");
-  };
+    const handleDisplayTable = async () => {    console.log(      "Selected Genomes:",      selectedGenomes.map((name) => name.split(" ")[0])    );    console.log(      "Selected Datasets:",      selectedDatasets.map((name) => name.split(" ")[0])    );    console.log(      "Compressor Types:",      [        compressorTypes.proposed ? 1 : 0,        compressorTypes.standard ? 1 : 0,      ].reverse()    );    console.log("Selected Standard Compressors:", selectedStandard.map(name => name.split("-")[1]));    console.log("Selected Proposed Compressors:", selectedProposed.map(name => name.split("-")[1]));    console.log("Selected Metrics:", selectedMetrics);    setGlobalLoading(true);    await displayTable();    setGlobalLoading(false);    router.push("/table");  };
 
   const handleDownloadTable: () => void = () => {
     const headers =
