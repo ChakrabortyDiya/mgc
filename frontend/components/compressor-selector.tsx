@@ -9,6 +9,14 @@ interface CompressorTypes {
   standard: boolean;
 }
 
+const standardOptions = [
+  "S-7zip", "S-paq8px", "S-bsc", "S-gzip", "S-zstd", "S-bzip2", "S-zpaq", "S-cmix"
+]
+
+const proposedOptions = [
+  "P-7zip", "P-paq8px", "P-bsc", "P-gzip", "P-zstd", "P-bzip2", "P-zpaq", "P-cmix"
+]
+
 export function CompressorSelector({
   compressorTypes,
   setCompressorTypes,
@@ -32,6 +40,18 @@ export function CompressorSelector({
 
   const handleCompressorTypeChange = (type: "standard" | "proposed") => {
     setCompressorTypes((prev) => ({ ...prev, [type]: !prev[type] }))
+  }
+
+  const handleStandardCheckbox = (option: string) => {
+    setSelectedStandard((prev) =>
+      prev.includes(option) ? prev.filter(o => o !== option) : [...prev, option]
+    )
+  }
+
+  const handleProposedCheckbox = (option: string) => {
+    setSelectedProposed((prev) =>
+      prev.includes(option) ? prev.filter(o => o !== option) : [...prev, option]
+    )
   }
 
   useEffect(() => {
@@ -101,45 +121,31 @@ export function CompressorSelector({
             </div>
           </div>
 
-          <div className={`flex-1 ${!compressorTypes.standard && "blur-sm"} `}>
-            <Label>Select standard compressor:</Label>
-            <select
-              multiple
-              className="w-full h-64 border rounded mt-2"
-              value={selectedStandard}
-              onChange={(e) => setSelectedStandard(Array.from(e.target.selectedOptions, (option) => option.value))}
-              disabled={!compressorTypes.standard}
-            >
-              <option>S-7zip</option>
-              <option>S-paq8px</option>
-              <option>S-bsc</option>
-              <option>S-gzip</option>
-              <option>S-zstd</option>
-              <option>S-bzip2</option>
-              <option>S-zpaq</option>
-              <option>S-cmix</option>
-            </select>
-          </div>
+           <div className={`flex-1 space-y-2 ${!compressorTypes.standard && "opacity-50 pointer-events-none"}`}>
+          <Label>Select standard compressors:</Label>
+          {standardOptions.map((option) => (
+            <label key={option} className="flex items-center space-x-2">
+              <Checkbox
+                checked={selectedStandard.includes(option)}
+                onCheckedChange={() => handleStandardCheckbox(option)}
+              />
+              <span>{option}</span>
+            </label>
+          ))}
+        </div>
 
-          <div className={`flex-1 ${!compressorTypes.proposed && "blur-sm"}`}>
-            <Label>Select proposed compressor:</Label>
-            <select
-              multiple
-              className="w-full h-64 border rounded mt-2"
-              value={selectedProposed}
-              onChange={(e) => setSelectedProposed(Array.from(e.target.selectedOptions, (option) => option.value))}
-              disabled={!compressorTypes.proposed}
-            >
-              <option>P-7zip</option>
-              <option>P-paq8px</option>
-              <option>P-bsc</option>
-              <option>P-gzip</option>
-              <option>P-zstd</option>
-              <option>P-bzip2</option>
-              <option>P-zpaq</option>
-              <option>P-cmix</option>
-            </select>
-          </div>
+        <div className={`flex-1 space-y-2 ${!compressorTypes.proposed && "opacity-50 pointer-events-none"}`}>
+          <Label>Select proposed compressors:</Label>
+          {proposedOptions.map((option) => (
+            <label key={option} className="flex items-center space-x-2">
+              <Checkbox
+                checked={selectedProposed.includes(option)}
+                onCheckedChange={() => handleProposedCheckbox(option)}
+              />
+              <span>{option}</span>
+            </label>
+          ))}
+        </div>
         </div>
       </div>
     </div>
