@@ -17,6 +17,8 @@ interface GlobalContextProps {
   setGlobalLoading: React.Dispatch<React.SetStateAction<boolean>>;
   selectedGenomeType: string;
   setSelectedGenomeType: React.Dispatch<React.SetStateAction<string>>;
+  testData: any;
+  setTestData: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const GlobalContext = createContext<GlobalContextProps>({
@@ -27,6 +29,8 @@ const GlobalContext = createContext<GlobalContextProps>({
   setGlobalLoading: () => {},
   selectedGenomeType: "DNA_Corpus",
   setSelectedGenomeType: () => {},
+  testData: {},
+  setTestData: () => {},
 });
 
 export const GlobalContextProvider = ({ children }: { children: ReactNode }) => {
@@ -34,6 +38,18 @@ export const GlobalContextProvider = ({ children }: { children: ReactNode }) => 
   const [comparisonRecords, setComparisonRecords] = useState<any[]>([]);
   const [globalLoading, setGlobalLoading] = useState<boolean>(false);
   const [selectedGenomeType, setSelectedGenomeType] = useState<string>("DNA_Corpus");
+  const [testData, setTestData] = useState<any>({
+    genomes: {
+      DNA_Corpus: {
+        size: "DNA Corpus 1",
+        checked: selectedGenomeType === "DNA_Corpus",
+      },
+      DNA: {
+        size: "DNA Corpus 2",
+        checked: selectedGenomeType === "DNA",
+      },
+    },
+  });
 
   useEffect(() => {
     console.log("Global Loading State:", globalLoading);
@@ -49,6 +65,8 @@ export const GlobalContextProvider = ({ children }: { children: ReactNode }) => 
         setGlobalLoading,
         selectedGenomeType,
         setSelectedGenomeType,
+        testData,
+        setTestData,
       }}
     >
       <AnimatePresence mode="wait">

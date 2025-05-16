@@ -15,6 +15,7 @@ interface CompressorTypes {
 
 export default function ComparisonPage() {
   const [selectedGenomes, setSelectedGenomes] = useState<string[]>([]);
+  const [selectedDatasets, setSelectedDatasets] = useState<string[]>([]);
   const [compressorTypes, setCompressorTypes] = useState<CompressorTypes>({
     proposed: true,
     standard: true,
@@ -24,7 +25,7 @@ export default function ComparisonPage() {
 
   const [selectedCompName, setSelectedCompName] = useState<string[]>([]);
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>([]);
-  const { setComparisonRecords, comparisonRecords, setGlobalLoading } =
+  const { setComparisonRecords, comparisonRecords, setGlobalLoading, testData } =
     useGlobalContext();
   const [downloadClicked, setDownloadClicked] = useState(false);
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function ComparisonPage() {
       const response = await axios.post(
         process.env.NEXT_PUBLIC_SERVER_LINK+"/dashboard/data",
         {
-          id: selectedGenomes.map((name) => name.split(" ")[0]),
+          id: testData.genomes.DNA_Corpus.checked ? selectedGenomes.map((name) => name.split(" ")[0]) : selectedDatasets.map((name) => name.split(" ")[0]),
           comp_type: [
             compressorTypes.proposed ? 1 : 0,
             compressorTypes.standard ? 1 : 0,
@@ -60,6 +61,10 @@ export default function ComparisonPage() {
     console.log(
       "Selected Genomes:",
       selectedGenomes.map((name) => name.split(" ")[0])
+    );
+    console.log(
+      "Selected Datasets:",
+      selectedDatasets.map((name) => name.split(" ")[0])
     );
     console.log(
       "Compressor Types:",
@@ -110,6 +115,8 @@ export default function ComparisonPage() {
       <CustomComparison
         selectedGenomes={selectedGenomes}
         setSelectedGenomes={setSelectedGenomes}
+        selectedDatasets={selectedDatasets}
+        setSelectedDatasets={setSelectedDatasets}
       />
       <CompressorSelector
         compressorTypes={compressorTypes}

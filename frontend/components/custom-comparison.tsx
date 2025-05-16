@@ -1,15 +1,20 @@
-"use client"
+"use client";
 
-import { useState} from "react"
+import { useState } from "react";
+import { useGlobalContext } from "./GlobalContext";
 
 type CustomComparisonProps = {
-  selectedGenomes?: string[]
-  setSelectedGenomes?: React.Dispatch<React.SetStateAction<string[]>>
-}
+  selectedGenomes?: string[];
+  setSelectedGenomes?: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedDatasets?: string[];
+  setSelectedDatasets?: React.Dispatch<React.SetStateAction<string[]>>;
+};
 
 export function CustomComparison({
   selectedGenomes,
   setSelectedGenomes,
+  selectedDatasets,
+  setSelectedDatasets,
 }: CustomComparisonProps) {
   // Use internal state if no external state is provided
   const [internalGenomes, setInternalGenomes] = useState<string[]>([]);
@@ -17,10 +22,9 @@ export function CustomComparison({
     selectedGenomes !== undefined ? selectedGenomes : internalGenomes;
   const effectiveSetSelectedGenomes =
     setSelectedGenomes !== undefined ? setSelectedGenomes : setInternalGenomes;
+  const { testData } = useGlobalContext();
 
-  const [selectedDatasets, setSelectedDatasets] = useState<string[]>([]);
-
- 
+  // const [selectedDatasets, setSelectedDatasets] = useState<string[]>([]);
 
   const handleGenomeChange = (genome: string) => {
     effectiveSetSelectedGenomes((prev) => {
@@ -35,12 +39,16 @@ export function CustomComparison({
   };
 
   const handleDatasetChange = (dataset: string) => {
-    setSelectedDatasets((prev) => {
-      const isIncluded = prev.includes(dataset);
-      const updated = isIncluded ? prev.filter((d) => d !== dataset) : [...prev, dataset];
-      // console.log(`Dataset ${dataset} ${isIncluded ? "deselected" : "selected"}`);
-      return updated;
-    });
+    if (setSelectedDatasets) {
+      setSelectedDatasets((prev) => {
+        const isIncluded = prev.includes(dataset);
+        const updated = isIncluded
+          ? prev.filter((d) => d !== dataset)
+          : [...prev, dataset];
+        // console.log(`Dataset ${dataset} ${isIncluded ? "deselected" : "selected"}`);
+        return updated;
+      });
+    }
   };
 
   const genomes = [
@@ -63,27 +71,19 @@ export function CustomComparison({
     "HoSa (1,85,306 kB)",
   ];
 
-  const datasets = {
-    dna: [
-      "humdyst (38,770 kB)",
-      "humprtb (56,737 kB)",
-      "humhdab (58,864 kB)",
-      "humghcs (66,495 kB)",
-      "humhbb (73,308 kB)",
-      "mtpacga (100,314 kB)",
-      "chmpxx (121,024 kB)",
-      "chntxx (155,844 kB)",
-      "mpomtcg (186,608 kB)",
-      "vaccg (191,737 kB)",
-      "hehcmv (229,354 kB)"
-
-    ],
-    rna: [
-      "SILVA 132 LSURef (5,95,993 kB)",
-      "SILVA 132 SSURef Nr99 (10,83,003 kB)",
-      "SILVA 132 SSURef (5,85,687 kB)"
-    ],
-  };
+  const datasets = [
+    "humdyst (38,770 kB)",
+    "humprtb (56,737 kB)",
+    "humhdab (58,864 kB)",
+    "humghcs (66,495 kB)",
+    "humhbb (73,308 kB)",
+    "mtpacga (100,314 kB)",
+    "chmpxx (121,024 kB)",
+    "chntxx (155,844 kB)",
+    "mpomtcg (186,608 kB)",
+    "vaccg (191,737 kB)",
+    "hehcmv (229,354 kB)",
+  ];
 
   return (
     <div className="space-y-8">
@@ -98,48 +98,58 @@ export function CustomComparison({
 
         <div className="grid grid-cols-2 gap-8">
           {/* DNA Corpus */}
-          <div>
-            <h4 className="text-sm font-medium text-gray-500 mb-2">
-              DNA Corpus 1
-            </h4>
-            <div className="border rounded-lg p-4 space-y-2 bg-white max-h-60 overflow-y-auto">
-              {genomes.map((genome) => (
-                <label key={genome} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    className="form-checkbox text-[#4A6EA9]"
-                    checked={effectiveSelectedGenomes.includes(genome)}
-                    onChange={() => handleGenomeChange(genome)}
-                  />
-                  <span className="text-sm text-gray-600">{genome}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* DNA Datasets */}
-          <div>
-            <h4 className="text-sm font-medium text-gray-500 mb-2">
-              DNA Corpus 2
-            </h4>
-            <div className="border rounded-lg p-4 space-y-6 bg-white max-h-60 overflow-y-auto">
-              <div className="space-y-2">
-                {datasets.dna.map((dataset) => (
-                  <label key={dataset} className="flex items-center space-x-2">
+         
+            <div>
+              <h4 className="text-sm font-medium text-gray-500 mb-2">
+                DNA Corpus 1
+              </h4>
+              <div className={`border rounded-lg p-4 space-y-2 bg-white max-h-60 overflow-y-auto ${testData.genomes.DNA.checked && "blur"}`}>
+                {genomes.map((genome) => (
+                  <label key={genome} className="flex items-center space-x-2">
                     <input
                       type="checkbox"
                       className="form-checkbox text-[#4A6EA9]"
-                      checked={selectedDatasets.includes(dataset)}
-                      onChange={() => handleDatasetChange(dataset)}
+                      checked={effectiveSelectedGenomes.includes(genome)}
+                      onChange={() => handleGenomeChange(genome)}
+                      disabled={testData.genomes.DNA.checked}
                     />
-                    <span className="text-sm text-gray-600">{dataset}</span>
+                    <span className="text-sm text-gray-600">{genome}</span>
                   </label>
                 ))}
               </div>
             </div>
+         
 
-            {/* RNA Datasets */}
-            {/* <div className="mt-4">
+          {/* DNA Datasets */}
+          
+            <div>
+              <h4 className="text-sm font-medium text-gray-500 mb-2">
+                DNA Corpus 2
+              </h4>
+              <div className={`border rounded-lg p-4 space-y-2 bg-white max-h-60 overflow-y-auto ${testData.genomes.DNA_Corpus.checked && "blur"}`}>
+                <div className="space-y-2">
+                  {datasets.map((dataset) => (
+                    <label
+                      key={dataset}
+                      className="flex items-center space-x-2"
+                    >
+                      <input
+                        type="checkbox"
+                        className="form-checkbox text-[#4A6EA9]"
+                        checked={selectedDatasets?.includes(dataset) || false}
+                        onChange={() => handleDatasetChange(dataset)}
+                        disabled={testData.genomes.DNA_Corpus.checked}
+                      />
+                      <span className="text-sm text-gray-600">{dataset}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          
+
+          {/* RNA Datasets */}
+          {/* <div className="mt-4">
               <h4 className="text-sm font-medium text-gray-500 mb-2">
                 RNA datasets (highly repetitive)
               </h4>
@@ -159,11 +169,9 @@ export function CustomComparison({
                 </div>
               </div>
             </div> */}
-          </div>
         </div>
-       <div className="h-6" />
       </div>
+      <div className="h-6" />
     </div>
   );
 }
-

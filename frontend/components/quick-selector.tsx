@@ -9,20 +9,20 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export function QuickSelector() {
   const router = useRouter();
-  const { selectedGenomeType, setSelectedGenomeType } = useGlobalContext();
+  const { selectedGenomeType, setSelectedGenomeType, testData, setTestData } = useGlobalContext();
 
-  const [testData, setTestData] = useState({
-    genomes: {
-      DNA_Corpus: {
-        size: "DNA Corpus 1",
-        checked: selectedGenomeType === "DNA_Corpus",
-      },
-      DNA: {
-        size: "DNA Corpus 2",
-        checked: selectedGenomeType === "DNA",
-      },
-    },
-  });
+  // const [testData, setTestData] = useState({
+  //   genomes: {
+  //     DNA_Corpus: {
+  //       size: "DNA Corpus 1",
+  //       checked: selectedGenomeType === "DNA_Corpus",
+  //     },
+  //     DNA: {
+  //       size: "DNA Corpus 2",
+  //       checked: selectedGenomeType === "DNA",
+  //     },
+  //   },
+  // });
 
   // const [selectedChartOptions] = useState<string[]>([]);
   const [selectedChartOptions, setSelectedChartOptions] = useState<string[]>(
@@ -37,11 +37,11 @@ export function QuickSelector() {
   ) => {
     setSelectedGenomeType(selectedOption);
 
-    setTestData((prev) => {
+    setTestData((prev: any) => {
       const updatedOptions = Object.entries(prev[category]).reduce(
         (acc, [option, value]) => {
           acc[option as keyof (typeof prev)[typeof category]] = {
-            ...value,
+            ...(value as object),
             checked: option === selectedOption,
           };
           return acc;
@@ -116,9 +116,9 @@ export function QuickSelector() {
     }
   };
 
-  const handleBarClick = (option: string, type: "barchart" | "scatterplot") => {
-    fetchData(option, type);
-  };
+  // const handleBarClick = (option: string, type: "barchart" | "scatterplot") => {
+  //   fetchData(option, type);
+  // };
   const [options, setOptions] = useState<string[]>([]);
   useEffect(() => {
     if (testData.genomes["DNA"].checked) {
@@ -127,7 +127,7 @@ export function QuickSelector() {
       setOptions(["WACR", "TCT", "PCM", "PCC", "TDT", "PDM", "PDC"]);
     }
   }, [testData]);
-  console.log(handleBarClick);
+
 
   // Animation variants
   const containerVariants = {
@@ -186,11 +186,8 @@ export function QuickSelector() {
               Benchmark dataset
             </motion.span>
             <div className="flex gap-4">
-              {Object.entries(testData.genomes).map(
-                ([size, data]: [
-                  string,
-                  { size: string; checked: boolean }
-                ]) => (
+              {Object.entries(testData.genomes as Record<string, { size: string; checked: boolean }>).map(
+                ([size, data]) => (
                   <motion.label 
                     key={size} 
                     className="inline-flex items-center"
