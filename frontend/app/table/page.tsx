@@ -32,16 +32,16 @@ const TablePage: React.FC = () => {
     if (comparisonRecords === undefined) return;
 
     // Detect page refresh
-    const navigationEntries = performance.getEntriesByType("navigation");
-    const isReload =
-      navigationEntries.length > 0 &&
-      (navigationEntries[0] as PerformanceNavigationTiming).type === "reload";
+    // const navigationEntries = performance.getEntriesByType("navigation");
+    // const isReload =
+    //   navigationEntries.length > 0 &&
+    //   (navigationEntries[0] as PerformanceNavigationTiming).type === "reload";
 
     // If refresh AND there's no data, redirect to "/"
-    if (isReload && (!comparisonRecords || comparisonRecords.length === 0)) {
-      router.replace("/");
-      return;
-    }
+    // if (isReload && (!comparisonRecords || comparisonRecords.length === 0)) {
+    //   router.replace("/");
+    //   return;
+    // }
 
     if (comparisonRecords.length > 0) {
       const parsedColumns = parseColumns(comparisonRecords);
