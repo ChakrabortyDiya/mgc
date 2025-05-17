@@ -28,7 +28,7 @@
 - **Linting:** ESLint
 - **UI Components:** Radix UI, Lucide Icons
 - **Animations:** Framer Motion
-- **Package Manager:** npm or yarn
+- **Package Manager:** npm 
 
 ## ⚙️ Backend
 
