@@ -1,6 +1,9 @@
 # Ignore environment variable definitions
 .env
 
+# Ignore test data
+backend\data
+
 # Ignore Python bytecode and caches
 __pycache__/
 *.py[cod]

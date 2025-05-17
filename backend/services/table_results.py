@@ -23,7 +23,7 @@ METRIC_MAP = {
 
 RESULT_METRIC_MAP = {
     "compression_ratio": "WACR",
-    "compressed_size": "Compression Size",
+    "compressed_size": "Compression Size (KB)",
     "compression_time": "TCT (s)",
     "compression_memory": "PCM (MB)",
     "decompression_time": "TDT (s)",
@@ -32,7 +32,7 @@ RESULT_METRIC_MAP = {
     "decompression_cpu": "PDC (%)",
 }
 
-class DashboardService:
+class TabularData:
     @staticmethod
     def fetch_grouped_results(collection: Collection, input_data: TableData) -> dict:
         """
@@ -76,7 +76,7 @@ class DashboardService:
                     if comp_name:  # Skip if None or empty string.
                         if comp_name == "7zip":
                             comp_name = "7-zip"
-                        DashboardService._process_query(
+                        TabularData._process_query(
                             collection, dataset_id, comp_name, "standard", metrices, results
                         )
             # Process proposed compressors.
@@ -85,11 +85,29 @@ class DashboardService:
                     if comp_name:
                         if comp_name == "7zip":
                             comp_name = "7-zip"
-                        DashboardService._process_query(
+                        TabularData._process_query(
                             collection, dataset_id, comp_name, "proposed", metrices, results
                         )
 
-        return results
+        # Rearrange results: group by compressor type, preserve compressor order
+        rearranged = []
+        # Build a lookup for quick access
+        result_lookup = {
+            (item["Dataset ID"], item["Compressor"], item["Compressor Type"]): item
+            for item in results
+        }
+        for dataset_id in input_data.id:
+            # Standard first
+            for comp_name in input_data.standard_comp_name:
+                key = (dataset_id, "7-zip" if comp_name == "7zip" else comp_name, "standard")
+                if key in result_lookup:
+                    rearranged.append(result_lookup[key])
+            # Then proposed
+            for comp_name in input_data.proposed_comp_name:
+                key = (dataset_id, "7-zip" if comp_name == "7zip" else comp_name, "proposed")
+                if key in result_lookup:
+                    rearranged.append(result_lookup[key])
+        return rearranged
 
     @staticmethod
     def _process_query(collection: Collection, dataset_id, comp_name, comp_type_str, metrics, results: list):
