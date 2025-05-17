@@ -12,13 +12,11 @@ export default function ContributorsPage() {
   };
 
   const contributors: Contributor[] = [
-    { name: "Subhankar Roy", email: "subhankar.roy07@gmail.com" },
     { name: "Arnab Charit", email: "arnabcharit29@gmail.com" },
+    { name: "Diya Chakraborty", email: "crs.diya@gmail.com" },
     { name: "Mriganka Patra", email: "mriganka9432@gmail.com" },
     { name: "Ananya Sadhukhan", email: "ananyasadhukhan1803@gmail.com" },
-    { name: "Partha Ghosh", email: "pghosh44@gmail.com" },
-    { name: "Diya Chakraborty", email: "crs.diya@gmail.com" },
-    { name: "Anirban Mukhopadhyay", email: "anirban@klyuniv.ac.in" },
+    { name: "Subhankar Roy", email: "subhankar.roy07@gmail.com" },
   ];
 
   return (

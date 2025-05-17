@@ -69,7 +69,14 @@ export default function AlgoPage() {
                     whileHover={{ x: 3 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    Convert four two-bit-coded nucleotides to extended ASCII code
+                    Transforming a 2-bit code into a series of 0s and 1s
+                  </motion.li>
+                  <motion.li 
+                    className="pl-2"
+                    whileHover={{ x: 3 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    Convert 8-bit block coding to an extended ASCII code
                   </motion.li>
                   <motion.li 
                     className="pl-2"
