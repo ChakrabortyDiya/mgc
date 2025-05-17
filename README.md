@@ -21,10 +21,13 @@
 
 ## 🖥️ Frontend
 
-- **Framework:** Next.js (React)
+- **Framework:** Next.js 14 + React 18
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
+- **Charts:** ApexCharts, D3, Recharts
 - **Linting:** ESLint
+- **UI Components:** Radix UI, Lucide Icons
+- **Animations:** Framer Motion
 - **Package Manager:** npm or yarn
 
 ## ⚙️ Backend
@@ -39,6 +42,3 @@
 - **Version Control:** Git
 
 ---
-
-
-
