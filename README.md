@@ -17,18 +17,26 @@
 
 ---
 
-## 🧩 Tech Stack
+# 🔧 Project Tech Stack
 
-### Frontend
+## 🖥️ Frontend
 
-- **NEXT JS**
-- **TypeScript**
-- **Tailwind CSS**
+- **Framework:** Next.js (React)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **Linting:** ESLint
+- **Package Manager:** npm or yarn
 
-### Backend
+## ⚙️ Backend
 
-- **FastAPI with Python**
-- **MongoDB**
+- **Framework:** FastAPI (Python 3)
+- **Database:** MongoDB (accessed via PyMongo)
+- **Dependency Management:** `requirements.txt`
+- **Logging:** Python logging module
+
+## 🚀 DevOps
+
+- **Version Control:** Git
 
 ---
 
