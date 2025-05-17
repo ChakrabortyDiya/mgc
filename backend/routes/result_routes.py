@@ -4,9 +4,9 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import HTMLResponse
 from database.db import db_dna, db_small_genomes # now using MongoDB databases from db.py
 from utils import TableData, MetricsPlotData
-from services.result_service import DashboardService
-from plots.plot_to_json import PlotGenerator
-from plots.scatter_to_json import ScatterPlotGenerator
+from services.table_results import TabularData
+from services.plot_to_json import PlotGenerator
+from services.scatter_to_json import ScatterPlotGenerator
 import plotly.graph_objects as go
 
 # Configure logging
@@ -41,8 +41,8 @@ def get_dashboard_data(data: TableData)->list:
     logger.info("[INFO] Fetching dashboard data...")
     logger.info(f"[INFO] Data: {data}")
     try:
-        result_dna = DashboardService.fetch_grouped_results(results_collection_dna, data)
-        result_genome = DashboardService.fetch_grouped_results(results_collection_genome, data)
+        result_dna = TabularData.fetch_grouped_results(results_collection_dna, data)
+        result_genome = TabularData.fetch_grouped_results(results_collection_genome, data)
         combined = result_dna + result_genome
 
         # Create a dict with a composite key

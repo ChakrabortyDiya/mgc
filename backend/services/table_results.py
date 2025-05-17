@@ -32,7 +32,7 @@ RESULT_METRIC_MAP = {
     "decompression_cpu": "PDC (%)",
 }
 
-class DashboardService:
+class TabularData:
     @staticmethod
     def fetch_grouped_results(collection: Collection, input_data: TableData) -> dict:
         """
@@ -76,7 +76,7 @@ class DashboardService:
                     if comp_name:  # Skip if None or empty string.
                         if comp_name == "7zip":
                             comp_name = "7-zip"
-                        DashboardService._process_query(
+                        TabularData._process_query(
                             collection, dataset_id, comp_name, "standard", metrices, results
                         )
             # Process proposed compressors.
@@ -85,7 +85,7 @@ class DashboardService:
                     if comp_name:
                         if comp_name == "7zip":
                             comp_name = "7-zip"
-                        DashboardService._process_query(
+                        TabularData._process_query(
                             collection, dataset_id, comp_name, "proposed", metrices, results
                         )
 
